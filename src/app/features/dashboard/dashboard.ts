@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
+import { PageHeader } from '../../shared/ui/page-header/page-header';
+import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 @Component({
   selector: 'app-dashboard',
-  template: '<h1>Dashboard</h1><p>Foundation placeholder.</p>',
+  imports: [PageHeader, EmptyState],
+  templateUrl: './dashboard.html',
+  styleUrl: './dashboard.scss',
 })
 export class Dashboard {}

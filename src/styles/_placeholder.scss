@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+.workspace-panel {
+  background: var(--sentinel-surface);
+  border: 1px solid var(--sentinel-border);
+  border-radius: var(--sentinel-radius-lg);
+  box-shadow: var(--sentinel-shadow-sm);
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sentinel-space-8);
+  padding: var(--sentinel-space-20) var(--sentinel-space-24);
+  border-bottom: 1px solid var(--sentinel-border);
+}
+.panel-header h2 {
+  font-size: var(--sentinel-font-h3);
+}
+.preview-label {
+  font-size: var(--sentinel-font-caption);
+  color: var(--sentinel-text-muted);
+}

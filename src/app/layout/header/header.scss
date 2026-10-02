@@ -1,20 +1,79 @@
+@use '../../../styles/typography' as type;
+:host {
+  display: block;
+  flex-shrink: 0;
+}
 header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  background: var(--sentinel-surface);
+  align-items: center;
+  gap: var(--sentinel-space-16);
+  min-height: var(--sentinel-header-height);
+  padding: var(--sentinel-space-12) var(--sentinel-space-32);
   border-bottom: 1px solid var(--sentinel-border);
-}
-.skip-link {
-  position: absolute;
-  inset-inline-start: 1rem;
-  top: -5rem;
-  padding: 0.5rem;
   background: var(--sentinel-surface);
-  color: var(--sentinel-primary);
 }
-.skip-link:focus {
-  top: 0.5rem;
+.page-context,
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--sentinel-space-8);
+}
+.page-context {
+  min-width: 0;
+}
+.controls {
+  flex-shrink: 0;
+}
+.separator {
+  height: var(--sentinel-space-24);
+  width: 1px;
+  background: var(--sentinel-border);
+  margin-inline: var(--sentinel-space-8);
+}
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: var(--sentinel-space-32);
+  height: var(--sentinel-space-32);
+  border-radius: 50%;
+  background: var(--sentinel-primary-subtle);
+  color: var(--sentinel-primary);
+  @include type.text(label);
+  font-weight: var(--sentinel-weight-semibold);
+}
+.user-button {
+  height: var(--sentinel-control-size);
+}
+.user-label {
+  margin-inline: var(--sentinel-space-8);
+  @include type.text(body-small);
+  color: var(--sentinel-text-secondary);
+}
+.user-button app-icon {
+  width: var(--sentinel-space-16);
+  vertical-align: middle;
+}
+.menu-preview {
+  max-width: 18rem;
+  padding: var(--sentinel-space-16);
+  @include type.text(body-small);
+}
+.menu-preview p {
+  color: var(--sentinel-text-secondary);
+  margin-top: var(--sentinel-space-8);
+}
+@media (max-width: 767px) {
+  header {
+    padding-inline: var(--sentinel-space-12);
+    gap: var(--sentinel-space-4);
+  }
+  .controls {
+    gap: 0;
+  }
+  .user-label,
+  .user-button app-icon,
+  .separator {
+    display: none;
+  }
 }

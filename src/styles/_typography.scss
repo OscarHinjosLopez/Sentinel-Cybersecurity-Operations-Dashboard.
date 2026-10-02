@@ -1,0 +1,9 @@
+@mixin text($level: body) {
+  font-size: var(--sentinel-font-#{$level});
+  line-height: var(--sentinel-line-body);
+}
+@mixin heading($level: h1) {
+  font-size: var(--sentinel-font-#{$level});
+  line-height: var(--sentinel-line-heading);
+  font-weight: var(--sentinel-weight-semibold);
+}

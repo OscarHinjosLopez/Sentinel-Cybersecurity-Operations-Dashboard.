@@ -1,3 +1,10 @@
 import { Component } from '@angular/core';
-@Component({ selector: 'app-audit', template: '<h1>Audit</h1><p>Foundation placeholder.</p>' })
+import { PageHeader } from '../../shared/ui/page-header/page-header';
+import { EmptyState } from '../../shared/ui/empty-state/empty-state';
+@Component({
+  selector: 'app-audit',
+  imports: [PageHeader, EmptyState],
+  templateUrl: './audit.html',
+  styleUrl: './audit.scss',
+})
 export class Audit {}
