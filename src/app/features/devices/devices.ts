@@ -1,3 +1,10 @@
 import { Component } from '@angular/core';
-@Component({ selector: 'app-devices', template: '<h1>Devices</h1><p>Foundation placeholder.</p>' })
+import { PageHeader } from '../../shared/ui/page-header/page-header';
+import { EmptyState } from '../../shared/ui/empty-state/empty-state';
+@Component({
+  selector: 'app-devices',
+  imports: [PageHeader, EmptyState],
+  templateUrl: './devices.html',
+  styleUrl: './devices.scss',
+})
 export class Devices {}

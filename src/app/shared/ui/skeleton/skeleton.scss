@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+.placeholder {
+  display: block;
+  height: var(--sentinel-space-16);
+  border-radius: var(--sentinel-radius-sm);
+  background: var(--sentinel-surface-hover);
+}
+.placeholder.card {
+  height: calc(var(--sentinel-space-48) * 3);
+  border-radius: var(--sentinel-radius-lg);
+  border: 1px solid var(--sentinel-border);
+}

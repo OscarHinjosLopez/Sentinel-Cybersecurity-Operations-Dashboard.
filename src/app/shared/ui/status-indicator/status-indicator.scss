@@ -1,0 +1,32 @@
+@use '../../../../styles/typography' as type;
+:host {
+  display: inline-flex;
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sentinel-space-8);
+  @include type.text(body-small);
+}
+.dot {
+  width: var(--sentinel-space-8);
+  height: var(--sentinel-space-8);
+  border-radius: 50%;
+  background: currentColor;
+}
+[data-tone='success'] {
+  color: var(--sentinel-success);
+}
+[data-tone='warning'] {
+  color: var(--sentinel-warning);
+}
+[data-tone='info'] {
+  color: var(--sentinel-info);
+}
+[data-tone='muted'] {
+  color: var(--sentinel-text-muted);
+}
+[data-tone='muted'] .dot {
+  background: transparent;
+  border: 1px solid currentColor;
+}

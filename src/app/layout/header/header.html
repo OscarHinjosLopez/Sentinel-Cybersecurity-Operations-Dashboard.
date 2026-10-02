@@ -1,6 +1,58 @@
 <header>
-  <a class="skip-link" href="#main-content">Skip to content</a><span>Sentinel ? Foundation</span>
-  <button matButton [attr.aria-pressed]="theme.mode() === 'dark'" (click)="theme.toggle()">
-    Dark theme
-  </button>
+  <div class="page-context">
+    @if (mobile()) {
+      <button
+        matIconButton
+        aria-label="Open navigation"
+        aria-controls="sentinel-navigation"
+        [attr.aria-expanded]="navigationOpen()"
+        (click)="menuRequested.emit()"
+      >
+        <app-icon name="menu" />
+      </button>
+    }
+    <app-breadcrumbs />
+  </div>
+  <div class="controls">
+    <button
+      matIconButton
+      [attr.aria-label]="theme.mode() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+      [matTooltip]="theme.mode() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+      (click)="theme.toggle()"
+    >
+      <app-icon [name]="theme.mode() === 'dark' ? 'sun' : 'moon'" />
+    </button>
+    <button
+      matIconButton
+      aria-label="Help, preview"
+      matTooltip="Help"
+      [matMenuTriggerFor]="helpMenu"
+    >
+      <app-icon name="help" />
+    </button>
+    <span class="separator" aria-hidden="true"></span>
+    <button
+      class="user-button"
+      matButton
+      aria-label="Security Analyst, profile preview"
+      [matMenuTriggerFor]="userMenu"
+    >
+      <span class="avatar" aria-hidden="true">OS</span
+      ><span class="user-label">Security Analyst</span><app-icon name="chevron" />
+    </button>
+  </div>
 </header>
+<mat-menu #helpMenu="matMenu"
+  ><div class="menu-preview">
+    <strong>Sentinel help</strong>
+    <p>Help resources will be available in a future release.</p>
+  </div>
+  <button mat-menu-item disabled>Documentation coming soon</button></mat-menu
+>
+<mat-menu #userMenu="matMenu"
+  ><div class="menu-preview">
+    <strong>Security Analyst</strong>
+    <p>Profile preview. No account connected.</p>
+  </div>
+  <button mat-menu-item disabled>Profile unavailable in this preview</button></mat-menu
+>

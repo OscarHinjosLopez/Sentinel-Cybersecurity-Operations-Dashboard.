@@ -4,14 +4,29 @@ html {
   @include mat.theme(
     (
       color: mat.$azure-palette,
-      typography: Arial,
-      density: 0,
+      typography: (
+        'Segoe UI',
+        Arial,
+        sans-serif,
+      ),
+      density: -1,
+    )
+  );
+  @include mat.theme-overrides(
+    (
+      primary: var(--sentinel-primary),
+      surface: var(--sentinel-surface),
+      surface-container: var(--sentinel-surface-elevated),
+      on-surface: var(--sentinel-text-primary),
+      on-surface-variant: var(--sentinel-text-secondary),
+      outline: var(--sentinel-border-strong),
+      outline-variant: var(--sentinel-border),
     )
   );
 }
-html[data-theme='light'] {
-  color-scheme: light;
-}
 html[data-theme='dark'] {
   color-scheme: dark;
+}
+html[data-theme='light'] {
+  color-scheme: light;
 }

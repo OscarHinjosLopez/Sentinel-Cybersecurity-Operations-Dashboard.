@@ -1,0 +1,29 @@
+@use '../../../../styles/typography' as type;
+ol {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sentinel-space-8);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  @include type.text(body-small);
+}
+li {
+  display: flex;
+  align-items: center;
+  gap: var(--sentinel-space-8);
+}
+a {
+  color: var(--sentinel-text-secondary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+span {
+  font-weight: var(--sentinel-weight-medium);
+}
+app-icon {
+  color: var(--sentinel-text-muted);
+}

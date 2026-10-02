@@ -1,27 +1,60 @@
+@use '@angular/material' as mat;
 :host {
-  display: flex;
-  flex-direction: column;
-  min-height: 100dvh;
+  display: block;
+  height: 100%;
 }
-.shell-body {
-  display: grid;
-  grid-template-columns: 12rem minmax(0, 1fr);
-  flex: 1;
+mat-sidenav-container {
+  height: 100%;
+  background: var(--sentinel-background);
+  color: var(--sentinel-text-primary);
+  @include mat.sidenav-overrides(
+    (
+      container-background-color: var(--sentinel-surface),
+      container-text-color: var(--sentinel-text-primary),
+      container-shape: 0,
+      scrim-color: var(--sentinel-overlay),
+    )
+  );
 }
-app-sidebar {
-  padding: 1rem;
-  background: var(--sentinel-surface);
+mat-sidenav {
+  width: var(--sentinel-sidebar-width);
   border-inline-end: 1px solid var(--sentinel-border);
 }
-main {
-  padding: 1.5rem;
+mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
 }
-@media (max-width: 40rem) {
-  .shell-body {
-    grid-template-columns: 1fr;
+main {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: var(--sentinel-space-32);
+}
+.page-content {
+  max-width: var(--sentinel-content-max-width);
+  margin-inline: auto;
+}
+.skip-link {
+  position: fixed;
+  z-index: 10;
+  inset-inline-start: var(--sentinel-space-16);
+  top: -5rem;
+  background: var(--sentinel-surface);
+  color: var(--sentinel-primary);
+  border: 1px solid var(--sentinel-border-strong);
+  border-radius: var(--sentinel-radius-md);
+  padding: var(--sentinel-space-12) var(--sentinel-space-16);
+}
+.skip-link:focus {
+  top: var(--sentinel-space-12);
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  mat-sidenav {
+    width: var(--sentinel-sidebar-compact-width);
   }
-  app-sidebar {
-    border-inline-end: 0;
-    border-bottom: 1px solid var(--sentinel-border);
+}
+@media (max-width: 767px) {
+  main {
+    padding: var(--sentinel-space-24) var(--sentinel-space-16);
   }
 }

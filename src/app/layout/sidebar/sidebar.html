@@ -1,7 +1,41 @@
+<div class="brand-row">
+  <a routerLink="/dashboard" class="brand" aria-label="Sentinel, Security Operations home">
+    <span class="brand-mark"><app-icon name="shield" /></span>
+    <span class="brand-copy"><strong>Sentinel</strong><span>Security Operations</span></span>
+  </a>
+  @if (mobile()) {
+    <button matIconButton aria-label="Close navigation" (click)="closeRequested.emit()">
+      <app-icon name="close" />
+    </button>
+  }
+</div>
 <nav aria-label="Main navigation">
-  <a routerLink="/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page">Dashboard</a>
-  <a routerLink="/threats" routerLinkActive="active" ariaCurrentWhenActive="page">Threats</a>
-  <a routerLink="/devices" routerLinkActive="active" ariaCurrentWhenActive="page">Devices</a>
-  <a routerLink="/audit" routerLinkActive="active" ariaCurrentWhenActive="page">Audit</a>
-  <a routerLink="/settings" routerLinkActive="active" ariaCurrentWhenActive="page">Settings</a>
+  <p class="nav-heading">WORKSPACE</p>
+  @for (item of primary; track item.path) {
+    <a
+      [routerLink]="item.path"
+      routerLinkActive="active"
+      ariaCurrentWhenActive="page"
+      [matTooltip]="item.label"
+      matTooltipPosition="right"
+    >
+      <app-icon [name]="item.icon" /><span class="nav-label">{{ item.label }}</span>
+    </a>
+  }
+</nav>
+<nav class="secondary" aria-label="Workspace settings">
+  @for (item of secondary; track item.path) {
+    <a
+      [routerLink]="item.path"
+      routerLinkActive="active"
+      ariaCurrentWhenActive="page"
+      [matTooltip]="item.label"
+      matTooltipPosition="right"
+    >
+      <app-icon [name]="item.icon" /><span class="nav-label">{{ item.label }}</span>
+    </a>
+  }
+  <div class="workspace-note">
+    <app-icon name="shield" /><span>Sentinel workspace<br /><small>Application shell</small></span>
+  </div>
 </nav>

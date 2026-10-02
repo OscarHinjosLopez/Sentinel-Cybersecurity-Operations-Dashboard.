@@ -1,0 +1,55 @@
+@use '../../../../styles/typography' as type;
+:host {
+  display: block;
+  margin-bottom: var(--sentinel-space-32);
+}
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sentinel-space-20);
+}
+.heading-group {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sentinel-space-16);
+  min-width: 0;
+}
+.page-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--sentinel-space-48);
+  height: var(--sentinel-space-48);
+  border: 1px solid var(--sentinel-border);
+  background: var(--sentinel-surface);
+  border-radius: var(--sentinel-radius-lg);
+  color: var(--sentinel-primary);
+  box-shadow: var(--sentinel-shadow-sm);
+}
+h1 {
+  letter-spacing: -0.025em;
+}
+p {
+  @include type.text(body-small);
+  color: var(--sentinel-text-secondary);
+  margin-top: var(--sentinel-space-8);
+}
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sentinel-space-8);
+}
+.actions:empty {
+  display: none;
+}
+@media (max-width: 767px) {
+  h1 {
+    @include type.heading(h2);
+  }
+  .page-icon {
+    display: none;
+  }
+}

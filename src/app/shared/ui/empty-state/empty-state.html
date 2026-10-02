@@ -1,0 +1,6 @@
+<div class="empty-state">
+  <span class="empty-icon"><app-icon [name]="icon()" /></span>
+  <h2>{{ title() }}</h2>
+  <p>{{ description() }}</p>
+  <div class="actions"><ng-content select="[empty-state-actions]" /></div>
+</div>

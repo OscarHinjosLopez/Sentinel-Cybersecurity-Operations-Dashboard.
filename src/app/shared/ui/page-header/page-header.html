@@ -1,0 +1,14 @@
+<div class="page-header">
+  <div class="heading-group">
+    @if (icon(); as name) {
+      <span class="page-icon"><app-icon [name]="name" /></span>
+    }
+    <div>
+      <h1>{{ title() }}</h1>
+      @if (description()) {
+        <p>{{ description() }}</p>
+      }
+    </div>
+  </div>
+  <div class="actions"><ng-content select="[page-header-actions]" /></div>
+</div>

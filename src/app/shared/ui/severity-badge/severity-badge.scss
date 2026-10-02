@@ -1,0 +1,33 @@
+@use '../../../../styles/typography' as type;
+:host {
+  display: inline-flex;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sentinel-space-8);
+  padding: var(--sentinel-space-4) var(--sentinel-space-8);
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-radius: var(--sentinel-radius-sm);
+  @include type.text(caption);
+  font-weight: var(--sentinel-weight-semibold);
+  background: color-mix(in srgb, currentColor 8%, var(--sentinel-surface));
+}
+.dot {
+  width: var(--sentinel-space-8);
+  height: var(--sentinel-space-8);
+  border-radius: 50%;
+  background: currentColor;
+}
+[data-severity='critical'] {
+  color: var(--sentinel-critical);
+}
+[data-severity='high'] {
+  color: var(--sentinel-high);
+}
+[data-severity='medium'] {
+  color: var(--sentinel-medium);
+}
+[data-severity='low'] {
+  color: var(--sentinel-low);
+}
