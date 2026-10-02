@@ -1,0 +1,21 @@
+@use './styles/theme';
+@use './styles/tokens';
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  min-height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--sentinel-background);
+  color: var(--sentinel-text);
+}
+app-root {
+  display: block;
+  min-height: 100dvh;
+}

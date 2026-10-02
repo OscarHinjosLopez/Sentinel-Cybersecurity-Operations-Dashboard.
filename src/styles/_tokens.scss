@@ -1,0 +1,10 @@
+:root {
+  --sentinel-background: var(--mat-sys-background);
+  --sentinel-surface: var(--mat-sys-surface);
+  --sentinel-text: var(--mat-sys-on-surface);
+  --sentinel-border: var(--mat-sys-outline-variant);
+  --sentinel-primary: var(--mat-sys-primary);
+  --sentinel-danger: var(--mat-sys-error);
+  --sentinel-warning: light-dark(#785900, #f4ce69);
+  --sentinel-success: light-dark(#246b35, #8eda9b);
+}

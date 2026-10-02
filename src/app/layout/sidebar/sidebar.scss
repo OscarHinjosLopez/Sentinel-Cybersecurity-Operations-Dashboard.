@@ -1,0 +1,13 @@
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+a {
+  color: var(--sentinel-text);
+  text-underline-offset: 0.25em;
+}
+a.active {
+  color: var(--sentinel-primary);
+  font-weight: 600;
+}
