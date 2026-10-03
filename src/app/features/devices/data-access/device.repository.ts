@@ -1,4 +1,5 @@
-import { inject, Injectable, InjectionToken } from '@angular/core';
+import { DestroyRef, inject, Injectable, InjectionToken } from '@angular/core';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
 import { Observable, map, timer } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { PERMISSIONS } from '../../../core/auth/auth.models';
@@ -21,9 +22,33 @@ export const DEVICE_MOCK_CONFIG = new InjectionToken<{
 });
 @Injectable({ providedIn: 'root' })
 export class MockDeviceRepository implements DeviceRepository {
+  private readonly realtime = inject(RealtimeService, { optional: true });
   private readonly auth = inject(AuthService);
   private readonly config = inject(DEVICE_MOCK_CONFIG);
   private readonly records = this.config.scenario === 'empty' ? [] : createDevices();
+  constructor() {
+    const unregister = this.realtime?.registerConsumer((event) => {
+      if (event.type !== 'device.status.changed') return;
+      const index = this.records.findIndex((device) => device.id === event.payload.deviceId);
+      const device = this.records[index];
+      if (!device) return;
+      this.records[index] = {
+        ...device,
+        status: event.payload.status,
+        lastSeenAt: event.payload.status === 'online' ? event.timestamp : device.lastSeenAt,
+        activity: [
+          {
+            timestamp: event.timestamp,
+            type: 'status' as const,
+            label: 'Live device status update',
+            description: `${device.status} → ${event.payload.status} (simulated)`,
+          },
+          ...device.activity,
+        ].slice(0, 50),
+      };
+    });
+    inject(DestroyRef).onDestroy(() => unregister?.());
+  }
   private delayed<T>(fn: () => T): Observable<T> {
     return timer(this.config.latency).pipe(
       map(() => {
@@ -102,6 +127,7 @@ export class MockDeviceRepository implements DeviceRepository {
         ],
       };
       this.records[index] = updated;
+      this.realtime?.markUpdated(`device:${id}`, timestamp);
       return updated;
     });
   }

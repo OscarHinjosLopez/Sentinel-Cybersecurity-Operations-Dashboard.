@@ -1,6 +1,6 @@
 # Sentinel — Cybersecurity Operations Dashboard
 
-Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye los Sprints **0 — Foundation**, **1 — Design System + Application Shell**, **2 — Authentication + RBAC**, **3 — SOC Dashboard**, **4 — Threat Management** y **5 — Device Inventory**. Dashboard, amenazas y dispositivos utilizan datos ficticios; Audit y Settings siguen siendo placeholders.
+Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye los Sprints **0 — Foundation**, **1 — Design System + Application Shell**, **2 — Authentication + RBAC**, **3 — SOC Dashboard**, **4 — Threat Management**, **5 — Device Inventory** y **6 — Real-time + WebSockets**. Dashboard, amenazas y dispositivos utilizan datos ficticios y un stream simulado; Audit y Settings siguen siendo placeholders.
 
 ## Stack
 
@@ -216,7 +216,7 @@ sessionStorage es una decisión temporal para este portfolio, accesible a JavaSc
 5. Revisar 375, 768, 1024 y 1440 px, consola, Tab, foco visible y salto al contenido.
 6. En móvil abrir el drawer, recorrerlo con Tab y cerrarlo mediante Escape, backdrop y navegación.
 
-La aplicación incluye autenticación y RBAC frontend mock, un dashboard SOC y gestión de amenazas de demostración. No incluye backend, JWT real, API real ni WebSockets.
+La aplicación incluye autenticación y RBAC frontend mock, dashboard SOC, gestión de amenazas e inventario de demostración y realtime simulado. No incluye backend, JWT real, API real ni conexión WebSocket real.
 
 ## SOC Dashboard — Sprint 3
 
@@ -258,7 +258,7 @@ Loading utiliza Skeleton; errores de lista/detalle ofrecen Retry sin detalles in
 
 Verificación: probar búsqueda, cada filtro, chips, sort, tamaños de página y Next/Previous; recargar la primera URL del ejemplo y recorrer Back/Forward. Abrir un detalle directamente y un ID inexistente. Con Admin/Analyst iniciar investigación y confirmar/cancelar cierre; con Viewer comprobar solo lectura. Revisar listado, detalle y dialog a 375, 768, 1024 y 1440 px en light/dark. Los tests cubren repository, debounce, cancelación, stores, estados, query params, reglas, autorización y regresión de selects restaurados.
 
-No hay acciones masivas, exportaciones, comentarios, asignaciones, auditoría global, WebSockets ni actualización automática.
+No hay acciones masivas, exportaciones, comentarios, asignaciones ni auditoría global. Sprint 6 añade actualizaciones automáticas mediante un transport mock; no existe servidor WebSocket.
 
 ## Device Inventory — Sprint 5
 
@@ -285,4 +285,46 @@ Isolate y Restore requieren Material Dialog, foco inicial en Cancel y restauraci
 
 Loading utiliza Skeleton. Lista y detalle ofrecen mensajes de error con Retry; EmptyState distingue No devices enrolled de No devices match your filters. Un ID desconocido muestra Device not found, sin redirección silenciosa. Para tests internos se puede sustituir `DEVICE_REPOSITORY` o configurar `DEVICE_MOCK_CONFIG` con `{ latency: 0, scenario: 'error' }` / `scenario: 'empty'`, sin controles de desarrollo visibles.
 
-Verificación: buscar, combinar filtros, ordenar, cambiar página/tamaño; recargar el ejemplo de URL y recorrer Back/Forward. Abrir `/devices/DEV-00142` directamente y `/devices/DEV-99999` para not found. Con Admin ejecutar scan y confirmar/cancelar Isolate/Restore; con Analyst/Viewer comprobar solo lectura. Revisar inventario, postura, vulnerabilidades, software y dialogs a 375, 768, 1024 y 1440 px en light/dark. Los tests cubren repository, stores, debounce, concurrencia, URL, detalle, clasificación, findings y permisos. Sprint 6 no está implementado.
+Verificación: buscar, combinar filtros, ordenar, cambiar página/tamaño; recargar el ejemplo de URL y recorrer Back/Forward. Abrir `/devices/DEV-00142` directamente y `/devices/DEV-99999` para not found. Con Admin ejecutar scan y confirmar/cancelar Isolate/Restore; con Analyst/Viewer comprobar solo lectura. Revisar inventario, postura, vulnerabilidades, software y dialogs a 375, 768, 1024 y 1440 px en light/dark. Los tests cubren repository, stores, debounce, concurrencia, URL, detalle, clasificación, findings y permisos.
+
+## Real-time + WebSockets — Sprint 6
+
+**El stream es simulado. No hay backend ni socket real.** No se añaden dependencias. `core/realtime` define el dominio, parser de `unknown`, token `REALTIME_TRANSPORT`, interfaz `RealtimeTransport`, `MockRealtimeTransport` y `RealtimeService`. Los componentes consumen Signals o eventos aceptados por el servicio; nunca manejan sockets directamente.
+
+```text
+MockRealtimeTransport → validación / deduplicación / orden → RealtimeService
+                                                           ↓
+                                   repositories → stores → Dashboard / Threats
+                                                           ↓
+                                               Header RealtimeStatus
+```
+
+La unión discriminada tiene cinco tipos, todos con `id`, `type`, `timestamp` ISO y `payload`:
+
+| Tipo                     | Payload                                                                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `threat.created`         | `threat` completo compatible con el modelo existente                                                                                  |
+| `threat.updated`         | `threatId`, `changes` limitado a título, descripción, severidad, estado, confianza, origen y destino; `previous` con estado/severidad |
+| `threat.resolved`        | `threatId`, `previous` con estado/severidad                                                                                           |
+| `device.status.changed`  | `deviceId`, `previousStatus`, `status`                                                                                                |
+| `security.score.changed` | `score` finito entre 0 y 100                                                                                                          |
+
+`previous` permite calcular deltas de KPI para amenazas fuera del feed visible. Cuando el servicio conoce el estado más reciente, utiliza ese estado en lugar de metadatos anteriores del evento. El parser comprueba envelope, enums, IDs, patch keys, fechas, rangos numéricos y colecciones anidadas. Un evento inválido se descarta sin romper el stream.
+
+El mock centraliza una secuencia determinista: tres altas, dos updates, una resolución, un cambio de dispositivo y un score por ciclo de ocho eventos. Emite **cada 8 segundos**, tras un handshake simulado de 150 ms. `MOCK_REALTIME_CONFIG` permite controlar tiempos en tests. Controles internos: `connect`, `disconnect`, `pause`, `resume`, `simulateDrop` y `emitForTesting`; no hay panel de desarrollo visible. IDs y secuencia continúan tras reconectar; timers/streams se limpian al destruir el transport.
+
+`RealtimeService` es una única instancia de aplicación: Signals `connectionState`, `lastEventAt`, `reconnectAttempt`, `events`; Observable `events$`. La sesión de `AuthService` abre la conexión tras login/restauración. Navegar no crea conexiones. Logout desconecta, cancela retries y borra caches/feed/journal. Un disconnect explícito del servicio también evita retries. Una caída del transport inicia backoff **1, 2, 4, 8, 15, 15… segundos**, con un único timer y máximo estable de 15 s mientras la sesión siga activa. Recuperar conexión reinicia el contador. Se distinguen `disconnected`, `connecting`, `connected`, `reconnecting`, `error`; durante retries la UI muestra Reconnecting, y tras desconexión intencionada Offline. La caída conserva el contenido y permite navegar.
+
+Se retienen **1000 IDs de eventos**, 1000 versiones/estados de entidades y 1000 IDs de altas; feed central de 20 y journal de replay de 500. Timestamps anteriores o iguales para la misma entidad se descartan. Las mutaciones locales registran su versión para evitar que un evento antiguo las revierta. La deduplicación es acotada, no garantiza detectar IDs arbitrariamente antiguos después de expulsarlos. El journal permite sincronizar respuestas pendientes; revisiones de snapshots evitan aplicar dos veces los deltas.
+
+Los repositories mock se inicializan al arrancar, antes del primer evento, y reciben eventos antes que los stores. Conservan sus proyecciones mientras la aplicación se ejecuta. Dashboard mantiene agregados para los tres rangos, incluso al expulsar eventos del journal. Sus series parten de fixtures y las altas incrementan el último bucket, la distribución por severidad y el vector; no se inventa una geolocalización a partir de una IP. El mapa conserva sus datos ficticios. Las altas ajustan Active/Critical, updates/resoluciones ajustan deltas, y score modifica el KPI. Recent Threat Activity muestra **Live** en registros recibidos y retiene 15 entradas. Refresh y cambios de rango conservan los deltas. La proyección del dashboard se reinicia al desconectar intencionadamente.
+
+Threats aplica eventos al repository y vuelve a consultar la consulta actual con `auditTime(100)` para agrupar bursts. Filtra y ordena el conjunto completo antes de paginar; preserva filtros/orden/query y total, y corrige una última página que queda vacía tras un evento. No inserta amenazas que incumplan filtros. El refresh live conserva las filas y no activa Skeleton. El detalle aplica patches directamente, sin nueva carga, ignora IDs ajenos y protege respuestas de carga/mutación anteriores. El repository conserva hasta 1000 amenazas y cada timeline live hasta 100 entradas. Device Inventory recibe cambios de estado en su repository para mantener coherencia en posteriores consultas; no añade auto refresh visual ni telemetría real.
+
+`RealtimeStatus` aparece en header y dashboard: Live, Connecting, Reconnecting u Offline, con tooltip de última recepción y contador. El header móvil usa un indicador compacto con el mismo texto accesible y tooltip al enfocar. Se distingue conexión activa/reconexión por relleno/contorno además del color. No hay animación nueva. Connection status y snackbar crítico usan `polite`; el feed no anuncia cada evento. Solo altas Critical generan snackbar, como máximo uno cada 10 s. ECharts conserva sus instancias y solo actualiza datasets afectados o cambios de rango/tema; un score no redibuja las gráficas. Listeners y subscriptions de feature se destruyen al salir.
+
+Para sustituir el mock, implementar `WebSocketRealtimeTransport` con la misma interfaz y cambiar el provider `REALTIME_TRANSPORT`. Los Observables deben sobrevivir a disconnect/reconnect y comunicar fallos por `connectionState$`. El adaptador futuro gestionará decodificación, socket y autenticación acordada con el backend. Este sprint no define un protocolo de autenticación, envía tokens ni incorpora secretos; la autorización real y la resincronización tras pérdidas de eventos corresponden al backend futuro. El mock reanuda la secuencia tras una caída; no simula entrega duradera de eventos perdidos ni persistencia entre recargas.
+
+Tests: se mantienen los 240 anteriores y se añaden 57 (297 total). Cubren transporte y destrucción, los cinco eventos/invalid payloads, backoff y máximo, logout/relogin/restauración reales, deduplicación/orden/memoria, proyecciones KPI/feed, refresh concurrente, filtros/sort/paginación, detalle/mutaciones anteriores, coherencia de dispositivos y avisos críticos accesibles.
+
+Verificación manual: arrancar con `npm start`, iniciar sesión y observar Live en `/dashboard`; esperar detecciones y snackbar Critical. En `/threats?severity=critical` solo entran altas compatibles. Abrir un detalle y emitir internamente un update del mismo ID; debe cambiar sin reload. `simulateDrop` muestra Reconnecting y mantiene datos hasta recuperar conexión. Repetir un `emitForTesting` con el mismo ID solo aplica una vez. Logout durante retry cancela la reconexión; login y recarga con sesión restaurada conectan una vez. Revisar las tres rutas y header a 375, 768, 1024 y 1440 px, light/dark, foco/tooltip, reduced motion y consola. **Sprint 7 no está implementado.**

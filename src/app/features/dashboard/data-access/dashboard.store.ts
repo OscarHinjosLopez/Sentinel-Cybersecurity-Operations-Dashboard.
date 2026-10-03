@@ -2,9 +2,13 @@ import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { Subscription } from 'rxjs';
 import { DASHBOARD_REPOSITORY } from './dashboard.repository';
 import { DashboardSummary, DashboardTimeRange } from '../models/dashboard.models';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
+import { applyDashboardEvent } from './dashboard-live';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Injectable()
 export class DashboardStore {
+  private readonly realtime = inject(RealtimeService, { optional: true });
   private readonly repository = inject(DASHBOARD_REPOSITORY);
   private readonly range = signal<DashboardTimeRange>('24h');
   private readonly summary = signal<DashboardSummary | null>(null);
@@ -25,6 +29,15 @@ export class DashboardStore {
     () => this.data()?.activity.reduce((sum, point) => sum + point.detected, 0) ?? 0,
   );
   constructor() {
+    this.realtime?.events$.pipe(takeUntilDestroyed()).subscribe((event) => {
+      this.summary.update((data) => {
+        if (!data) return null;
+        const updated = applyDashboardEvent(data, event);
+        return updated === data
+          ? data
+          : { ...updated, realtimeRevision: this.realtime!.currentRevision };
+      });
+    });
     inject(DestroyRef).onDestroy(() => {
       this.version++;
       this.request?.unsubscribe();
@@ -38,7 +51,13 @@ export class DashboardStore {
     this.request = this.repository.getSummary(this.range()).subscribe({
       next: (summary) => {
         if (version !== this.version) return;
-        this.summary.set(summary);
+        const merged =
+          summary && this.realtime
+            ? this.realtime
+                .eventsSince(summary.realtimeRevision ?? 0)
+                .reduce(applyDashboardEvent, summary)
+            : summary;
+        this.summary.set(merged);
         this.updated.set(new Date());
         this.loading.set(false);
       },

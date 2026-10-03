@@ -33,6 +33,7 @@ export interface ThreatOrigin {
   readonly count: number;
 }
 export interface RecentThreat {
+  readonly live?: boolean;
   readonly id: string;
   readonly severity: Severity;
   readonly title: string;
@@ -42,6 +43,7 @@ export interface RecentThreat {
   readonly status: Status;
 }
 export interface DashboardSummary {
+  readonly realtimeRevision?: number;
   readonly range: DashboardTimeRange;
   readonly generatedAt: string;
   readonly metrics: readonly KpiMetric[];
