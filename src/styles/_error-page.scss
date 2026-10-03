@@ -1,0 +1,35 @@
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60dvh;
+  text-align: center;
+  padding: var(--sentinel-space-24);
+}
+.error-code {
+  font-size: var(--sentinel-font-display);
+  font-weight: var(--sentinel-weight-bold);
+  color: var(--sentinel-primary);
+  letter-spacing: -0.04em;
+}
+.not-found-icon {
+  display: grid;
+  place-items: center;
+  width: var(--sentinel-space-48);
+  height: var(--sentinel-space-48);
+  border: 1px solid var(--sentinel-border);
+  border-radius: var(--sentinel-radius-xl);
+  margin-block: var(--sentinel-space-24);
+  background: var(--sentinel-surface);
+  color: var(--sentinel-text-secondary);
+}
+p {
+  max-width: 28rem;
+  color: var(--sentinel-text-secondary);
+  margin-block: var(--sentinel-space-16) var(--sentinel-space-32);
+}
+a app-icon {
+  vertical-align: middle;
+  margin-inline-end: var(--sentinel-space-8);
+}

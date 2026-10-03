@@ -1,3 +1,7 @@
+import { AuthService } from './core/auth/auth.service';
+import { AUTH_API } from './core/auth/data-access/auth-api';
+import { MockAuthApi, MOCK_AUTH_LATENCY } from './core/auth/data-access/mock-auth-api';
+import { SESSION_STORAGE_KEY } from './core/auth/session-storage';
 import { TestBed } from '@angular/core/testing';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { of } from 'rxjs';
@@ -5,11 +9,14 @@ import { provideRouter, Router } from '@angular/router';
 import { App } from './app';
 import { routes } from './app.routes';
 describe('Foundation routing', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    sessionStorage.removeItem(SESSION_STORAGE_KEY);
     TestBed.configureTestingModule({
       imports: [App],
       providers: [
         provideRouter(routes),
+        { provide: AUTH_API, useExisting: MockAuthApi },
+        { provide: MOCK_AUTH_LATENCY, useValue: 0 },
         {
           provide: BreakpointObserver,
           useValue: {
@@ -19,7 +26,12 @@ describe('Foundation routing', () => {
         },
       ],
     });
+    await TestBed.inject(AuthService).login({
+      email: 'admin@sentinel.dev',
+      password: 'Sentinel123!',
+    });
   });
+  afterEach(() => sessionStorage.removeItem(SESSION_STORAGE_KEY));
   it.each([
     ['/dashboard', 'Security Overview'],
     ['/threats', 'Threats'],

@@ -11,7 +11,7 @@
 </div>
 <nav aria-label="Main navigation">
   <p class="nav-heading">WORKSPACE</p>
-  @for (item of primary; track item.path) {
+  @for (item of primary(); track item.path) {
     <a
       [routerLink]="item.path"
       routerLinkActive="active"
@@ -24,7 +24,7 @@
   }
 </nav>
 <nav class="secondary" aria-label="Workspace settings">
-  @for (item of secondary; track item.path) {
+  @for (item of secondary(); track item.path) {
     <a
       [routerLink]="item.path"
       routerLinkActive="active"
