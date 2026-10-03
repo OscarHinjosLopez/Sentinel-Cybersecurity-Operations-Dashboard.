@@ -20,7 +20,8 @@ export const routes: Routes = [
         path: 'dashboard',
         data: { breadcrumb: 'Dashboard', permission: PERMISSIONS.DASHBOARD_VIEW },
         title: 'Dashboard | Sentinel',
-        loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
+        loadChildren: () =>
+          import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
       {
         path: 'threats',
