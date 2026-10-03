@@ -1,4 +1,17 @@
 import { safeReturnUrl } from './return-url';
+
+describe('Threat detail return URLs', () => {
+  it('preserves valid internal threat detail destinations after login', () =>
+    expect(safeReturnUrl('/threats/THR-00001?status=open')).toBe('/threats/THR-00001?status=open'));
+  it.each([
+    '/threats/../../login',
+    '/threats/THR-00001/extra',
+    '/threats/https:evil',
+    '//evil.test/threats/THR-00001',
+  ])('rejects unsupported detail destination %s', (value) =>
+    expect(safeReturnUrl(value)).toBe('/dashboard'),
+  );
+});
 describe('safeReturnUrl', () => {
   it.each(['/devices', '/threats?filter=active#details', '/audit', '/settings', '/dashboard'])(
     'accepts internal feature destination %s',
