@@ -1,5 +1,7 @@
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
-import { Subject, Subscription } from 'rxjs';
+import { auditTime, filter, Subject, Subscription } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
 import { THREAT_REPOSITORY } from './threat.repository';
 import {
   ThreatListResponse,
@@ -12,6 +14,7 @@ import {
 import { DEFAULT_THREAT_QUERY } from '../utils/threat-query';
 @Injectable()
 export class ThreatListStore {
+  private readonly realtime = inject(RealtimeService, { optional: true });
   private readonly repository = inject(THREAT_REPOSITORY);
   private readonly currentQuery = signal<ThreatQuery>(DEFAULT_THREAT_QUERY);
   private readonly response = signal<ThreatListResponse | null>(null);
@@ -45,6 +48,15 @@ export class ThreatListStore {
   readonly end = computed(() => (this.start() ? this.start() + this.data().length - 1 : 0));
   readonly pageCount = computed(() => Math.max(1, Math.ceil(this.total() / this.query().pageSize)));
   constructor() {
+    this.realtime?.events$
+      .pipe(
+        filter((event) => event.type.startsWith('threat.')),
+        auditTime(100),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => {
+        if (this.loaded) this.load(true);
+      });
     inject(DestroyRef).onDestroy(() => {
       this.version++;
       this.request?.unsubscribe();
@@ -58,21 +70,26 @@ export class ThreatListStore {
     this.currentQuery.set(query);
     this.load();
   }
-  load(): void {
+  load(live = false): void {
     this.loaded = true;
     const version = ++this.version;
     this.request?.unsubscribe();
-    this.pending.set(true);
+    if (!live || !this.response()) this.pending.set(true);
     this.failure.set(null);
     this.request = this.repository.list(this.query()).subscribe({
       next: (response) => {
         if (version !== this.version) return;
+        const maxPage = Math.max(1, Math.ceil(response.total / this.query().pageSize));
+        if (live && this.query().page > maxPage) {
+          this.commit({ page: maxPage });
+          return;
+        }
         this.response.set(response);
         this.pending.set(false);
       },
       error: () => {
         if (version !== this.version) return;
-        this.failure.set('Unable to load threats.');
+        if (!live || !this.response()) this.failure.set('Unable to load threats.');
         this.pending.set(false);
       },
     });

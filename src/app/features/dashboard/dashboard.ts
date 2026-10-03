@@ -11,9 +11,11 @@ import { DashboardStore } from './data-access/dashboard.store';
 import { DashboardChart } from './ui/dashboard-chart';
 import { KpiCard } from './ui/kpi-card';
 import { ThreatOrigins } from './ui/threat-origins';
+import { RealtimeStatus } from '../../shared/ui/realtime-status/realtime-status';
 @Component({
   selector: 'app-dashboard',
   imports: [
+    RealtimeStatus,
     PageHeader,
     EmptyState,
     Skeleton,

@@ -5,8 +5,12 @@ import { PERMISSIONS } from '../../../core/auth/auth.models';
 import { Threat, ThreatId, ThreatStatus } from '../models/threat.models';
 import { TRANSITIONS, canTransition } from '../utils/threat-rules';
 import { THREAT_REPOSITORY } from './threat.repository';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { applyThreatEvent } from '../utils/threat-live';
 @Injectable()
 export class ThreatDetailStore {
+  private readonly realtime = inject(RealtimeService, { optional: true });
   private readonly repository = inject(THREAT_REPOSITORY);
   private readonly auth = inject(AuthService);
   private readonly record = signal<Threat | null>(null);
@@ -32,6 +36,10 @@ export class ThreatDetailStore {
     this.canInvestigate() && this.data() ? TRANSITIONS[this.data()!.status] : [],
   );
   constructor() {
+    this.realtime?.events$.pipe(takeUntilDestroyed()).subscribe((event) => {
+      this.record.update((threat) => applyThreatEvent(threat, event, this.id));
+      if (this.record()) this.missing.set(false);
+    });
     inject(DestroyRef).onDestroy(() => {
       this.version++;
       this.request?.unsubscribe();
@@ -52,8 +60,12 @@ export class ThreatDetailStore {
     this.request = this.repository.getById(id).subscribe({
       next: (threat) => {
         if (version !== this.version) return;
-        this.record.set(threat);
-        this.missing.set(threat === null);
+        const merged = (this.realtime?.snapshot().events ?? []).reduce(
+          (record, event) => applyThreatEvent(record, event, id),
+          threat,
+        );
+        this.record.set(merged);
+        this.missing.set(merged === null);
         this.pending.set(false);
       },
       error: () => {
@@ -83,7 +95,9 @@ export class ThreatDetailStore {
     this.mutation = this.repository.updateStatus(threat.id, status).subscribe({
       next: (updated) => {
         if (version !== this.version) return;
-        this.record.set(updated);
+        const current = this.record();
+        if (!current || Date.parse(current.updatedAt) <= Date.parse(updated.updatedAt))
+          this.record.set(updated);
         this.updating.set(false);
         onSuccess();
       },

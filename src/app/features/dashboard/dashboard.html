@@ -15,6 +15,7 @@
   </div>
 </app-page-header>
 <div class="context">
+  <app-realtime-status />
   <span>Demo environment · Fictional security data</span
   ><span role="status">
     @if (store.isLoading()) {
@@ -161,7 +162,12 @@
           <li>
             <app-severity-badge [severity]="event.severity" />
             <div class="event-content">
-              <h3>{{ event.title }}</h3>
+              <h3>
+                {{ event.title }}
+                @if (event.live) {
+                  <small class="live-label">Live</small>
+                }
+              </h3>
               <p>{{ event.source }} <span aria-hidden="true">→</span> {{ event.target }}</p>
             </div>
             <app-status-indicator [status]="event.status" /><time

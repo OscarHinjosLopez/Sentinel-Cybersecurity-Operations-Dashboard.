@@ -7,9 +7,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { ThemeService } from '../../core/services/theme.service';
 import { Icon } from '../../shared/ui/icon/icon';
 import { Breadcrumbs } from '../../shared/ui/breadcrumbs/breadcrumbs';
+import { RealtimeStatus } from '../../shared/ui/realtime-status/realtime-status';
 @Component({
   selector: 'app-header',
-  imports: [MatButtonModule, MatTooltipModule, MatMenuModule, Icon, Breadcrumbs],
+  imports: [MatButtonModule, MatTooltipModule, MatMenuModule, Icon, Breadcrumbs, RealtimeStatus],
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })

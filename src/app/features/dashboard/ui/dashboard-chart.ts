@@ -2,12 +2,14 @@ import { DOCUMENT } from '@angular/common';
 import {
   afterNextRender,
   Component,
+  computed,
   effect,
   ElementRef,
   inject,
   input,
   OnDestroy,
   viewChild,
+  untracked,
 } from '@angular/core';
 import { init, use, EChartsType } from 'echarts/core';
 import { LineChart, PieChart, BarChart } from 'echarts/charts';
@@ -44,6 +46,14 @@ export class DashboardChart implements OnDestroy {
   private readonly theme = inject(ThemeService);
   private readonly document = inject(DOCUMENT);
   private chart?: EChartsType;
+  private readonly dataset = computed(() =>
+    this.kind() === 'activity'
+      ? this.summary().activity
+      : this.kind() === 'severity'
+        ? this.summary().severities
+        : this.summary().vectors,
+  );
+  private readonly range = computed(() => this.summary().range);
   private observer?: ResizeObserver;
   constructor() {
     afterNextRender(() => {
@@ -53,10 +63,11 @@ export class DashboardChart implements OnDestroy {
       this.render();
     });
     effect(() => {
-      this.summary();
+      this.dataset();
+      this.range();
       this.kind();
       this.theme.mode();
-      this.render();
+      untracked(() => this.render());
     });
   }
   private render(): void {

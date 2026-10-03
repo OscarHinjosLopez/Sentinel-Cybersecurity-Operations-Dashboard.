@@ -1,4 +1,6 @@
-import { inject, Injectable, InjectionToken } from '@angular/core';
+import { DestroyRef, inject, Injectable, InjectionToken } from '@angular/core';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
+import { applyThreatEvent } from '../utils/threat-live';
 import { Observable, timer, map } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { PERMISSIONS } from '../../../core/auth/auth.models';
@@ -26,9 +28,28 @@ export const THREAT_MOCK_CONFIG = new InjectionToken<{
 });
 @Injectable({ providedIn: 'root' })
 export class MockThreatRepository implements ThreatRepository {
+  private readonly realtime = inject(RealtimeService, { optional: true });
   private readonly config = inject(THREAT_MOCK_CONFIG);
   private readonly auth = inject(AuthService);
   private readonly records = this.config.scenario === 'empty' ? [] : createThreats();
+  constructor() {
+    const unregister = this.realtime?.registerConsumer((event) => {
+      if (
+        event.type !== 'threat.created' &&
+        event.type !== 'threat.updated' &&
+        event.type !== 'threat.resolved'
+      )
+        return;
+      const id = event.type === 'threat.created' ? event.payload.threat.id : event.payload.threatId;
+      const index = this.records.findIndex((threat) => threat.id === id);
+      const updated = applyThreatEvent(this.records[index] ?? null, event, id);
+      if (!updated) return;
+      if (index < 0) this.records.push(updated);
+      else this.records[index] = updated;
+      if (this.records.length > 1000) this.records.splice(0, this.records.length - 1000);
+    });
+    inject(DestroyRef).onDestroy(() => unregister?.());
+  }
   private delayed<T>(operation: () => T): Observable<T> {
     return timer(this.config.latency).pipe(
       map(() => {
@@ -95,6 +116,10 @@ export class MockThreatRepository implements ThreatRepository {
         ],
       };
       this.records[index] = updated;
+      this.realtime?.markUpdated(`threat:${id}`, timestamp, {
+        status: updated.status,
+        severity: updated.severity,
+      });
       return updated;
     });
   }
