@@ -3,7 +3,16 @@ import tseslint from 'typescript-eslint';
 import angular from 'angular-eslint';
 import prettier from 'eslint-config-prettier';
 export default tseslint.config(
-  { ignores: ['dist/**', '.angular/**', 'coverage/**', 'node_modules/**'] },
+  {
+    ignores: [
+      'dist/**',
+      '.angular/**',
+      'coverage/**',
+      'node_modules/**',
+      'playwright-report/**',
+      'test-results/**',
+    ],
+  },
   {
     files: ['**/*.ts'],
     extends: [

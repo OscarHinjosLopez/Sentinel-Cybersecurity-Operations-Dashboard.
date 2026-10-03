@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '../auth/auth.service';
@@ -17,6 +18,7 @@ describe('UX dialog lifecycle', () => {
   let closed: Subject<CommandId | undefined>;
   let help: Subject<void>;
   let active: unknown[];
+  let feedback: ReturnType<typeof vi.fn>;
   beforeEach(() => {
     authenticated = signal(true);
     opened = signal(false);
@@ -24,6 +26,7 @@ describe('UX dialog lifecycle', () => {
     closed = new Subject();
     help = new Subject();
     active = [];
+    feedback = vi.fn();
     open = vi.fn(() => {
       const ref = {
         afterClosed: () => closed,
@@ -45,6 +48,7 @@ describe('UX dialog lifecycle', () => {
         },
         { provide: CommandRegistry, useValue: { helpRequested: help, execute } },
         { provide: MatDialog, useValue: { open, openDialogs: active } },
+        { provide: MatSnackBar, useValue: { open: feedback } },
       ],
     });
     service = TestBed.inject(UxDialogService);
@@ -89,5 +93,41 @@ describe('UX dialog lifecycle', () => {
       ariaLabel: 'Keyboard shortcuts',
       restoreFocus: true,
     });
+  });
+  it('opens and closes the notification panel from store state and restores state on Escape', async () => {
+    opened.set(true);
+    TestBed.tick();
+    await vi.waitFor(() => expect(open).toHaveBeenCalledTimes(1));
+    expect(open.mock.calls[0][1]).toMatchObject({
+      ariaLabelledBy: 'notification-title',
+      restoreFocus: true,
+      autoFocus: 'button',
+    });
+    closed.next(undefined);
+    expect(opened()).toBe(false);
+  });
+  it('recovers from an overlay failure with safe feedback and permits retry', async () => {
+    open.mockImplementationOnce(() => {
+      throw new Error('Private overlay implementation detail');
+    });
+    await service.openPalette();
+    expect(feedback).toHaveBeenCalledWith(
+      'Unable to open this panel. Please try again.',
+      'Dismiss',
+      {
+        duration: 4000,
+        politeness: 'polite',
+      },
+    );
+    await service.openPalette();
+    expect(active).toHaveLength(1);
+    expect(execute).not.toHaveBeenCalled();
+  });
+  it('does not stack a notification panel over an existing business dialog', async () => {
+    active.push({});
+    opened.set(true);
+    TestBed.tick();
+    await vi.waitFor(() => expect(opened()).toBe(false));
+    expect(open).not.toHaveBeenCalled();
   });
 });
