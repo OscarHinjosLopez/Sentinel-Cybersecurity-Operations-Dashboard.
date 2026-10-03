@@ -1,16 +1,176 @@
-<app-page-header
+﻿<app-page-header
   title="Security Overview"
   description="Monitor threats, devices and security activity across your organization."
   icon="dashboard"
-/>
-<section class="workspace-panel" aria-labelledby="dashboard-workspace">
-  <div class="panel-header">
-    <h2 id="dashboard-workspace">Workspace overview</h2>
-    <span class="preview-label">Workspace preview</span>
+>
+  <div page-header-actions class="toolbar">
+    <label class="sr-only" for="dashboard-range">Time range</label
+    ><select id="dashboard-range" [value]="store.selectedRange()" (change)="changeRange($event)">
+      @for (range of ranges; track range.value) {
+        <option [value]="range.value">{{ range.label }}</option>
+      }</select
+    ><button mat-stroked-button (click)="store.refresh()" [disabled]="store.isLoading()">
+      {{ store.isLoading() ? 'Updating…' : 'Refresh' }}
+    </button>
   </div>
-  <app-empty-state
-    icon="dashboard"
-    title="Your security workspace starts here"
-    description="Security monitoring will be available in a future sprint. This preview contains no operational data."
-  />
+</app-page-header>
+<div class="context">
+  <span>Demo environment · Fictional security data</span
+  ><span role="status">
+    @if (store.isLoading()) {
+      Updating security overview…
+    } @else if (store.lastUpdated(); as updated) {
+      Last updated {{ updated | date: 'HH:mm' }}
+    }
+  </span>
+</div>
+<section [attr.aria-busy]="store.isLoading()" aria-label="Security dashboard">
+  @if (store.error(); as error) {
+    <div class="panel state" role="alert">
+      <h2>{{ error }}</h2>
+      <p>Please try again to retrieve the latest overview.</p>
+      <button mat-flat-button (click)="store.retry()">Retry</button>
+    </div>
+  } @else if (store.isLoading() && !store.data()) {
+    <div class="kpis">
+      @for (item of [1, 2, 3, 4]; track item) {
+        <div class="loading-kpi">
+          <app-skeleton variant="card" label="Loading security metric" />
+        </div>
+      }
+    </div>
+    <div class="charts">
+      @for (item of [1, 2, 3, 4]; track item) {
+        <div class="panel loading-chart">
+          <app-skeleton variant="card" label="Loading dashboard visualization" />
+        </div>
+      }
+    </div>
+  } @else if (store.isEmpty()) {
+    <div class="panel state">
+      <app-empty-state
+        icon="shield"
+        title="No security activity yet"
+        description="Security activity will appear here when monitoring data becomes available."
+      />
+    </div>
+  } @else if (store.data(); as data) {
+    <div class="kpis">
+      @for (metric of data.metrics; track metric.id) {
+        <app-kpi-card [metric]="metric" />
+      }
+    </div>
+    <div class="charts">
+      <article class="panel activity">
+        <div class="panel-heading">
+          <div>
+            <h2>Threat Activity</h2>
+            <p>Detected and blocked threats over time</p>
+          </div>
+          <span class="stat">{{ store.detectedTotal() | number }} <small>detected</small></span>
+        </div>
+        <app-dashboard-chart
+          kind="activity"
+          [summary]="data"
+          description="Threat activity: solid line shows detected threats; dashed line shows blocked threats. Expand the data below for exact values."
+        />
+        <details>
+          <summary>View activity data</summary>
+          <div class="data-list">
+            @for (point of data.activity; track point.timestamp) {
+              <p>
+                <time>{{ point.timestamp | date: (data.range === '24h' ? 'HH:mm' : 'MMM d') }}</time
+                ><span>Detected {{ point.detected }} · Blocked {{ point.blocked }}</span>
+              </p>
+            }
+          </div>
+        </details>
+      </article>
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Severity Distribution</h2>
+            <p>All detections in the selected period</p>
+          </div>
+        </div>
+        <app-dashboard-chart
+          kind="severity"
+          [summary]="data"
+          description="Threat distribution by severity. Counts and percentages are listed below."
+        />
+        <ul class="severity-list">
+          @for (item of data.severities; track item.severity) {
+            <li>
+              <app-severity-badge [severity]="item.severity" /><strong>{{
+                item.count | number
+              }}</strong
+              ><span
+                >{{
+                  (store.detectedTotal() ? (item.count / store.detectedTotal()) * 100 : 0)
+                    | number: '1.1-1'
+                }}%</span
+              >
+            </li>
+          }
+        </ul>
+      </article>
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Attack Vectors</h2>
+            <p>Most common entry points</p>
+          </div>
+        </div>
+        <app-dashboard-chart
+          kind="vectors"
+          [summary]="data"
+          description="Attack vectors ranked by detection count. Expand the data below for exact values."
+        />
+        <details>
+          <summary>View vector data</summary>
+          <div class="data-list">
+            @for (vector of data.vectors; track vector.name) {
+              <p>
+                <span>{{ vector.name }}</span
+                ><strong>{{ vector.count | number }}</strong>
+              </p>
+            }
+          </div>
+        </details>
+      </article>
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Global Threat Origins</h2>
+            <p>Fictional source locations · schematic map</p>
+          </div>
+        </div>
+        <app-threat-origins [origins]="data.origins" />
+      </article>
+    </div>
+    <article class="panel recent">
+      <div class="panel-heading">
+        <div>
+          <h2>Recent Threat Activity</h2>
+          <p>Latest signals from your security environment</p>
+        </div>
+        <a mat-button routerLink="/threats">View all threats</a>
+      </div>
+      <ul class="events">
+        @for (event of data.recent; track event.id) {
+          <li>
+            <app-severity-badge [severity]="event.severity" />
+            <div class="event-content">
+              <h3>{{ event.title }}</h3>
+              <p>{{ event.source }} <span aria-hidden="true">→</span> {{ event.target }}</p>
+            </div>
+            <app-status-indicator [status]="event.status" /><time
+              [attr.datetime]="event.timestamp"
+              >{{ event.timestamp | date: 'HH:mm' }}</time
+            >
+          </li>
+        }
+      </ul>
+    </article>
+  }
 </section>

@@ -1,12 +1,13 @@
 # Sentinel — Cybersecurity Operations Dashboard
 
-Base frontend para una futura aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye **Sprint 0 — Foundation**, **Sprint 1 — Design System + Application Shell** y **Sprint 2 — Authentication + RBAC**. Las páginas del dominio siguen siendo placeholders.
+Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye **Sprint 0 — Foundation**, **Sprint 1 — Design System + Application Shell**, **Sprint 2 — Authentication + RBAC** y **Sprint 3 — SOC Dashboard**. El dashboard utiliza datos ficticios; las demás páginas del dominio siguen siendo placeholders.
 
 ## Stack
 
 - Angular 22 y TypeScript 6 con `strict` y `strictTemplates`.
 - Componentes standalone y Angular zoneless, activado por defecto en Angular 22; sin Zone.js.
-- Angular Signals para tema y autenticación; RxJS para el contrato de acceso a datos mock.
+- Angular Signals para tema, autenticación y dashboard; RxJS para los contratos de acceso a datos mock.
+- Apache ECharts integrado directamente con renderer SVG y módulos específicos, cargado con el dashboard.
 - Angular Material 22, Angular CDK 22 y SCSS.
 - Vitest 5 con el builder oficial de Angular y jsdom.
 - ESLint con angular-eslint/typescript-eslint y Prettier. eslint-config-prettier evita conflictos de formato.
@@ -32,7 +33,7 @@ En PowerShell con ejecución de scripts restringida, utiliza `npm.cmd` en lugar 
 npm start
 ```
 
-Abre http://localhost:4200. La raíz redirige a `/dashboard`. El sidebar filtra por permisos los enlaces a `/dashboard`, `/threats`, `/devices`, `/audit` y `/settings`. Cada página es un placeholder cargado mediante `loadComponent`; las rutas desconocidas muestran una página 404 dentro del shell. El shell requiere una sesión demo. Sin sesión, las rutas protegidas redirigen a `/login` conservando un `returnUrl`.
+Abre http://localhost:4200. La raíz redirige a `/dashboard`. El sidebar filtra por permisos los enlaces a `/dashboard`, `/threats`, `/devices`, `/audit` y `/settings`. El dashboard y las demás páginas se cargan de forma lazy; las rutas desconocidas muestran una página 404 dentro del shell. El shell requiere una sesión demo. Sin sesión, las rutas protegidas redirigen a `/login` conservando un `returnUrl`.
 
 ## Build
 
@@ -215,4 +216,20 @@ sessionStorage es una decisión temporal para este portfolio, accesible a JavaSc
 5. Revisar 375, 768, 1024 y 1440 px, consola, Tab, foco visible y salto al contenido.
 6. En móvil abrir el drawer, recorrerlo con Tab y cerrarlo mediante Escape, backdrop y navegación.
 
-La base incluye autenticación y RBAC frontend mock. No incluye backend, JWT real, API real, WebSockets ni funcionalidades SOC.
+La aplicación incluye autenticación y RBAC frontend mock y un dashboard SOC de demostración. No incluye backend, JWT real, API real ni WebSockets.
+
+## SOC Dashboard — Sprint 3
+
+`features/dashboard` contiene los modelos estrictos, `data-access`, componentes `ui` y `dashboard.routes.ts`. La página permanece en la raíz de la feature para evitar una carpeta adicional con un solo componente.
+
+`DashboardRepository` es un contrato Observable inyectado mediante `DASHBOARD_REPOSITORY`. El provider de la ruta utiliza `MockDashboardRepository`, con 650 ms de latencia y rangos `24h`, `7d` y `30d`. Las fixtures son deterministas para un rango y una fecha dados. Severidades, vectores y países suman el total de detecciones; las amenazas abiertas son un inventario distinto del volumen detectado durante el periodo. Los IPs de ejemplo usan bloques reservados para documentación.
+
+`DashboardStore` usa Signals y computed para gestionar rango, datos, loading, error, última actualización y totales. Cambiar el rango cancela la solicitud anterior; una versión de solicitud evita sobrescrituras antiguas. Refresh conserva el contenido mientras carga. No hay polling ni actualizaciones en tiempo real.
+
+Los cuatro KPIs comparten `KpiCard`. La semántica de tendencias depende de si conviene aumentar o reducir la métrica. Security Score muestra Excellent (90+), Good (75+), Needs attention (50+) o Critical. La protección de dispositivos se calcula a partir del numerador y denominador.
+
+Las gráficas siguen los tokens del tema, observan el tamaño del contenedor con ResizeObserver y liberan instancias y observadores al destruirse. Respetan reduced motion. Activity y vectors ofrecen datos textuales desplegables; severity muestra counts y porcentajes. El mapa SVG es un esquema original local, sin datos geográficos de terceros ni servicios externos; sus siluetas son orientativas, no fronteras precisas. Los hotspots y sus conteos son ficticios y tienen una lista equivalente.
+
+Para probar los estados sin controles de desarrollo visibles, los tests sustituyen `DASHBOARD_REPOSITORY` o configuran `DASHBOARD_MOCK_CONFIG` con `{ latency: 0, scenario: 'error' }` o `scenario: 'empty'`. El escenario por defecto es `success`. Loading usa Skeleton, vacío usa EmptyState y error ofrece Retry sin detalles internos.
+
+Verificación del dashboard: cambiar los tres rangos, hacer refresh, abrir los datos textuales, navegar a View all threats y alternar light/dark a 375, 768, 1024 y 1440 px. Los tests cubren coherencia de datos, estados, retry, cancelación, destrucción y tendencias. ECharts utiliza licencia Apache-2.0; referencia de integración: [documentación oficial](https://echarts.apache.org/handbook/en/basics/import/).
