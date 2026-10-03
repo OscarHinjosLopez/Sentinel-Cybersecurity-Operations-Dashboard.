@@ -8,13 +8,26 @@ import { ThemeService } from '../../core/services/theme.service';
 import { Icon } from '../../shared/ui/icon/icon';
 import { Breadcrumbs } from '../../shared/ui/breadcrumbs/breadcrumbs';
 import { RealtimeStatus } from '../../shared/ui/realtime-status/realtime-status';
+import { MatBadgeModule } from '@angular/material/badge';
+import { NotificationStore } from '../../core/notifications/notification.store';
+import { UxDialogService } from '../../core/commands/ux-dialog.service';
 @Component({
   selector: 'app-header',
-  imports: [MatButtonModule, MatTooltipModule, MatMenuModule, Icon, Breadcrumbs, RealtimeStatus],
+  imports: [
+    MatButtonModule,
+    MatTooltipModule,
+    MatMenuModule,
+    MatBadgeModule,
+    Icon,
+    Breadcrumbs,
+    RealtimeStatus,
+  ],
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
 export class Header {
+  readonly notifications = inject(NotificationStore, { optional: true });
+  readonly dialogs = inject(UxDialogService, { optional: true });
   readonly mobile = input(false);
   readonly navigationOpen = input(false);
   readonly menuRequested = output<void>();

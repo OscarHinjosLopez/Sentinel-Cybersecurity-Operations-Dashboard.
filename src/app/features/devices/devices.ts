@@ -21,10 +21,13 @@ import {
 import { DeviceSort } from './models/device.models';
 import { PageHeader } from '../../shared/ui/page-header/page-header';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
+import { QuickActions } from '../../shared/ui/quick-actions/quick-actions';
+import { UserPreferencesService } from '../../core/preferences/user-preferences.service';
 @Component({
   selector: 'app-devices',
   host: { class: 'record-list' },
   imports: [
+    QuickActions,
     PageHeader,
     EmptyState,
     Skeleton,
@@ -42,6 +45,7 @@ import { EmptyState } from '../../shared/ui/empty-state/empty-state';
   styleUrl: './devices.scss',
 })
 export class Devices {
+  private readonly preferences = inject(UserPreferencesService);
   readonly store = inject(DeviceListStore);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -63,7 +67,7 @@ export class Devices {
       });
     });
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-      const query = parseDeviceQuery(params);
+      const query = parseDeviceQuery(params, this.preferences.defaultPageSize());
       this.searchText.set(query.search);
       this.store.applyQuery(query);
       const values: Record<string, unknown> = {

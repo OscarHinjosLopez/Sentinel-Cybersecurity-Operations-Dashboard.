@@ -11,10 +11,15 @@ import {
   ProtectionStatus,
 } from '../models/device.models';
 import { DEFAULT_DEVICE_QUERY, serializeDeviceQuery } from '../utils/device-query';
+import { UserPreferencesService } from '../../../core/preferences/user-preferences.service';
 @Injectable()
 export class DeviceListStore {
+  private readonly preferences = inject(UserPreferencesService);
   private readonly repository = inject(DEVICE_REPOSITORY);
-  private readonly current = signal<DeviceQuery>(DEFAULT_DEVICE_QUERY);
+  private readonly current = signal<DeviceQuery>({
+    ...DEFAULT_DEVICE_QUERY,
+    pageSize: this.preferences.defaultPageSize(),
+  });
   private readonly response = signal<DeviceListResponse | null>(null);
   private readonly loading = signal(false);
   private readonly failure = signal<string | null>(null);
@@ -121,7 +126,7 @@ export class DeviceListStore {
     this.commit({ pageSize });
   }
   resetFilters(): void {
-    this.commit(DEFAULT_DEVICE_QUERY);
+    this.commit({ ...DEFAULT_DEVICE_QUERY, pageSize: this.preferences.defaultPageSize() });
   }
   retry(): void {
     this.load();

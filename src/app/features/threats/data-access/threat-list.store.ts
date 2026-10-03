@@ -12,11 +12,16 @@ import {
   ThreatVector,
 } from '../models/threat.models';
 import { DEFAULT_THREAT_QUERY } from '../utils/threat-query';
+import { UserPreferencesService } from '../../../core/preferences/user-preferences.service';
 @Injectable()
 export class ThreatListStore {
+  private readonly preferences = inject(UserPreferencesService);
   private readonly realtime = inject(RealtimeService, { optional: true });
   private readonly repository = inject(THREAT_REPOSITORY);
-  private readonly currentQuery = signal<ThreatQuery>(DEFAULT_THREAT_QUERY);
+  private readonly currentQuery = signal<ThreatQuery>({
+    ...DEFAULT_THREAT_QUERY,
+    pageSize: this.preferences.defaultPageSize(),
+  });
   private readonly response = signal<ThreatListResponse | null>(null);
   private readonly pending = signal(false);
   private readonly failure = signal<string | null>(null);
@@ -132,7 +137,7 @@ export class ThreatListStore {
     this.commit({ pageSize });
   }
   resetFilters(): void {
-    this.commit({ ...DEFAULT_THREAT_QUERY });
+    this.commit({ ...DEFAULT_THREAT_QUERY, pageSize: this.preferences.defaultPageSize() });
   }
   retry(): void {
     this.load();

@@ -13,10 +13,13 @@ import { SEVERITIES, STATUSES, VECTORS, STATUS_LABELS, VECTOR_LABELS } from './u
 import { ThreatSort, ThreatSeverity, ThreatStatus, ThreatVector } from './models/threat.models';
 import { PageHeader } from '../../shared/ui/page-header/page-header';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
+import { QuickActions } from '../../shared/ui/quick-actions/quick-actions';
+import { UserPreferencesService } from '../../core/preferences/user-preferences.service';
 @Component({
   selector: 'app-threats',
   host: { class: 'record-list' },
   imports: [
+    QuickActions,
     FormsModule,
     PageHeader,
     EmptyState,
@@ -33,6 +36,7 @@ import { EmptyState } from '../../shared/ui/empty-state/empty-state';
   styleUrl: './threats.scss',
 })
 export class Threats {
+  private readonly preferences = inject(UserPreferencesService);
   readonly store = inject(ThreatListStore);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -58,7 +62,7 @@ export class Threats {
       });
     });
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-      const query = parseThreatQuery(params);
+      const query = parseThreatQuery(params, this.preferences.defaultPageSize());
       this.searchText.set(query.search);
       this.store.applyQuery(query);
       // Preserve valid explicit defaults; normalize only values that fail parsing.

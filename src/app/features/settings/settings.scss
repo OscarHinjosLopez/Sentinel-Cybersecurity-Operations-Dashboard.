@@ -1,1 +1,70 @@
-@use '../../../styles/placeholder';
+:host {
+  display: block;
+}
+.preferences-panel {
+  max-width: 56rem;
+  padding: 1.5rem;
+  border: 1px solid var(--sentinel-border);
+  border-radius: var(--sentinel-radius-lg);
+  background: var(--sentinel-surface);
+}
+h2 {
+  font-size: 1.125rem;
+}
+.intro {
+  color: var(--sentinel-text-secondary);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+.preference {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--sentinel-border);
+}
+.preference:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+label,
+strong {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+p {
+  color: var(--sentinel-text-secondary);
+  font-size: 0.875rem;
+  margin-top: 0.35rem;
+  max-width: 36rem;
+}
+select {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: var(--sentinel-text-primary);
+  background: var(--sentinel-surface);
+  border: 1px solid var(--sentinel-border-strong);
+  border-radius: var(--sentinel-radius-md);
+  flex-shrink: 0;
+}
+mat-slide-toggle {
+  flex-shrink: 0;
+}
+@media (max-width: 767px) {
+  .preferences-panel {
+    padding: 1rem;
+  }
+  .preference {
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .preference > div {
+    flex: 1;
+    min-width: 12rem;
+  }
+  select {
+    max-width: 100%;
+  }
+}

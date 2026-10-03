@@ -25,7 +25,10 @@ function validDate(raw: string | null): string | undefined {
     ? raw
     : undefined;
 }
-export function parseThreatQuery(params: ParamMap): ThreatQuery {
+export function parseThreatQuery(
+  params: ParamMap,
+  defaultPageSize: 10 | 25 | 50 = 25,
+): ThreatQuery {
   const rawPage = params.get('page') ?? '1';
   const page = /^\d+$/.test(rawPage) ? Number(rawPage) : 1;
   const size = Number(params.get('pageSize'));
@@ -46,7 +49,7 @@ export function parseThreatQuery(params: ParamMap): ThreatQuery {
     sortBy: SORTS.includes(sort as ThreatSort) ? (sort as ThreatSort) : 'detectedAt',
     sortDirection: params.get('direction') === 'asc' ? 'asc' : 'desc',
     page: Number.isSafeInteger(page) && page > 0 && page <= 10000 ? page : 1,
-    pageSize: size === 10 || size === 50 ? size : 25,
+    pageSize: size === 10 || size === 25 || size === 50 ? size : defaultPageSize,
   };
 }
 export function serializeThreatQuery(query: ThreatQuery): Params {

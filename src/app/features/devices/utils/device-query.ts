@@ -23,7 +23,10 @@ export const DEVICE_SORTS: readonly { key: DeviceSort; label: string }[] = [
 function enumValue<T extends string>(raw: string | null, values: readonly T[]): T | '' {
   return values.find((item) => item === raw) ?? '';
 }
-export function parseDeviceQuery(params: ParamMap): DeviceQuery {
+export function parseDeviceQuery(
+  params: ParamMap,
+  defaultPageSize: 10 | 25 | 50 = 25,
+): DeviceQuery {
   const raw = params.get('page') ?? '1';
   const page = /^\d+$/.test(raw) ? Number(raw) : 1;
   const size = Number(params.get('pageSize'));
@@ -34,7 +37,7 @@ export function parseDeviceQuery(params: ParamMap): DeviceQuery {
     os: enumValue(params.get('os'), OS_FAMILIES),
     protection: enumValue(params.get('protection'), PROTECTIONS),
     page: Number.isSafeInteger(page) && page > 0 && page <= 10000 ? page : 1,
-    pageSize: size === 10 || size === 50 ? size : 25,
+    pageSize: size === 10 || size === 25 || size === 50 ? size : defaultPageSize,
     sortBy: DEVICE_SORTS.find((item) => item.key === params.get('sort'))?.key ?? 'hostname',
     sortDirection: params.get('direction') === 'desc' ? 'desc' : 'asc',
   };

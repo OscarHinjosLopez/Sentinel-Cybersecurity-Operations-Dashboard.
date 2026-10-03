@@ -1,16 +1,92 @@
 <app-page-header
   title="Settings"
-  description="Manage Sentinel preferences and application configuration."
+  description="Manage your local Sentinel preferences."
   icon="settings"
 />
-<section class="workspace-panel" aria-labelledby="settings-workspace">
-  <div class="panel-header">
-    <h2 id="settings-workspace">Settings workspace</h2>
-    <span class="preview-label">Workspace preview</span>
+<section class="preferences-panel" aria-labelledby="preferences-title">
+  <h2 id="preferences-title">User preferences</h2>
+  <p class="intro">
+    Appearance and interaction preferences apply to this browser. Changes are saved automatically.
+  </p>
+  <div class="preference">
+    <div>
+      <label for="preference-theme">Theme</label>
+      <p id="theme-description">Use the same appearance as the header theme control.</p>
+    </div>
+    <select
+      id="preference-theme"
+      aria-describedby="theme-description"
+      [value]="preferences.themeMode()"
+      (change)="theme($event)"
+    >
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
   </div>
-  <app-empty-state
-    icon="settings"
-    title="Settings workspace ready"
-    description="Application settings will be available in a future sprint. Use the header to change the appearance."
-  />
+  <div class="preference">
+    <div>
+      <strong id="compact-label">Compact mode</strong>
+      <p id="compact-description">
+        Reduce spacing in tables and cards while keeping controls comfortable to use.
+      </p>
+    </div>
+    <mat-slide-toggle
+      [checked]="preferences.compactMode()"
+      aria-labelledby="compact-label"
+      aria-describedby="compact-description"
+      (change)="preferences.update({ compactMode: $event.checked })"
+    />
+  </div>
+  <div class="preference">
+    <div>
+      <label for="preference-motion">Reduced motion</label>
+      <p id="motion-description">
+        System follows your device preference. Full explicitly enables motion even if your system
+        prefers reduced motion.
+      </p>
+    </div>
+    <select
+      id="preference-motion"
+      aria-describedby="motion-description"
+      [value]="preferences.motion()"
+      (change)="motion($event)"
+    >
+      <option value="system">System preference</option>
+      <option value="reduce">Reduce motion</option>
+      <option value="full">Full motion</option>
+    </select>
+  </div>
+  <div class="preference">
+    <div>
+      <label for="preference-size">Default page size</label>
+      <p id="size-description">
+        Used for Threats and Devices when the URL does not specify a page size.
+      </p>
+    </div>
+    <select
+      id="preference-size"
+      aria-describedby="size-description"
+      [value]="preferences.defaultPageSize()"
+      (change)="pageSize($event)"
+    >
+      <option value="10">10 rows</option>
+      <option value="25">25 rows</option>
+      <option value="50">50 rows</option>
+    </select>
+  </div>
+  <div class="preference">
+    <div>
+      <strong id="notification-label">Realtime notifications</strong>
+      <p id="notification-description">
+        Add relevant live events to Notification Center. Turning this off keeps realtime monitoring
+        and dashboard updates active.
+      </p>
+    </div>
+    <mat-slide-toggle
+      [checked]="preferences.realtimeNotifications()"
+      aria-labelledby="notification-label"
+      aria-describedby="notification-description"
+      (change)="preferences.update({ realtimeNotifications: $event.checked })"
+    />
+  </div>
 </section>
