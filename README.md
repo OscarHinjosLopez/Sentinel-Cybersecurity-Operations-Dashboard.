@@ -1,6 +1,6 @@
 ﻿# Sentinel — Cybersecurity Operations Dashboard
 
-Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye los Sprints **0 — Foundation**, **1 — Design System + Application Shell**, **2 — Authentication + RBAC**, **3 — SOC Dashboard**, **4 — Threat Management**, **5 — Device Inventory**, **6 — Real-time + WebSockets** y **7 — Advanced UX**. Dashboard, amenazas y dispositivos utilizan datos ficticios y un stream simulado; Audit conserva su placeholder; Settings permite configurar preferencias frontend.
+Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye los Sprints **0 — Foundation**, **1 — Design System + Application Shell**, **2 — Authentication + RBAC**, **3 — SOC Dashboard**, **4 — Threat Management**, **5 — Device Inventory**, **6 — Real-time + WebSockets**, **7 — Advanced UX** y **8 — Testing + Quality Engineering**. Dashboard, amenazas y dispositivos utilizan datos ficticios y un stream simulado; Audit conserva su placeholder; Settings permite configurar preferencias frontend.
 
 ## Stack
 
@@ -327,7 +327,7 @@ Para sustituir el mock, implementar `WebSocketRealtimeTransport` con la misma in
 
 Tests: se mantienen los 240 anteriores y se añaden 57 (297 total). Cubren transporte y destrucción, los cinco eventos/invalid payloads, backoff y máximo, logout/relogin/restauración reales, deduplicación/orden/memoria, proyecciones KPI/feed, refresh concurrente, filtros/sort/paginación, detalle/mutaciones anteriores, coherencia de dispositivos y avisos críticos accesibles.
 
-Verificación manual: arrancar con `npm start`, iniciar sesión y observar Live en `/dashboard`; esperar detecciones y snackbar Critical. En `/threats?severity=critical` solo entran altas compatibles. Abrir un detalle y emitir internamente un update del mismo ID; debe cambiar sin reload. `simulateDrop` muestra Reconnecting y mantiene datos hasta recuperar conexión. Repetir un `emitForTesting` con el mismo ID solo aplica una vez. Logout durante retry cancela la reconexión; login y recarga con sesión restaurada conectan una vez. Revisar las tres rutas y header a 375, 768, 1024 y 1440 px, light/dark, foco/tooltip, reduced motion y consola. **Sprint 7 está implementado; Sprint 8 no está iniciado.**
+Verificación manual: arrancar con `npm start`, iniciar sesión y observar Live en `/dashboard`; esperar detecciones y snackbar Critical. En `/threats?severity=critical` solo entran altas compatibles. Abrir un detalle y emitir internamente un update del mismo ID; debe cambiar sin reload. `simulateDrop` muestra Reconnecting y mantiene datos hasta recuperar conexión. Repetir un `emitForTesting` con el mismo ID solo aplica una vez. Logout durante retry cancela la reconexión; login y recarga con sesión restaurada conectan una vez. Revisar las tres rutas y header a 375, 768, 1024 y 1440 px, light/dark, foco/tooltip, reduced motion y consola.
 
 ## Advanced UX — Sprint 7
 
@@ -364,4 +364,99 @@ Las secuencias G caducan después de un segundo. Los atajos de letras y ? se ign
 
 UserPreferencesService valida la estructura versionada de sentinel.preferences (version: 1). Datos corruptos/incompatibles vuelven a defaults; storage bloqueado conserva los cambios en memoria durante la sesión. No persiste tokens, sesión ni notificaciones. ThemeService mantiene su clave existente sentinel-theme. El tamaño predeterminado se aplica a Threats/Devices cuando no hay pageSize válido en la URL; un pageSize explícito, incluido 25, prevalece.
 
-Tests del sprint cubren stores, reglas realtime/deduplicación, permisos, búsquedas, teclado, diálogos, persistencia corrupta/bloqueada y tamaño de página. Se conservan los 297 tests anteriores. La revisión manual incluye las tres cuentas, light/dark y 375/768/1024/1440 px. No se incorporan backend, push/browser notifications, exports, saved searches ni funcionalidades del Sprint 8.
+Tests del sprint cubren stores, reglas realtime/deduplicación, permisos, búsquedas, teclado, diálogos, persistencia corrupta/bloqueada y tamaño de página. Se conservan los 297 tests anteriores. La revisión manual incluye las tres cuentas, light/dark y 375/768/1024/1440 px. No se incorporan backend, push/browser notifications, exports, saved searches ni nuevas funcionalidades principales de negocio.
+
+## Development
+
+Node **24.21.0** está fijado en `.nvmrc` y compartido con CI. Utiliza npm 11 y el lockfile:
+
+```bash
+npm ci
+npm start
+```
+
+La aplicación normal conserva sus mocks y tiempos existentes. La configuración `e2e` reemplaza únicamente `src/main.ts` por `src/testing/main.e2e.ts`: reduce latencias mock, pausa el generador periódico realtime y expone un bridge interno para emitir eventos y seleccionar el escenario del dashboard. No hay controles de debug visibles. El build de producción no incorpora el bridge ni los providers de testing.
+
+## Unit tests
+
+```bash
+npm test -- --run
+```
+
+La estrategia sigue una pirámide: **unit/pure logic** para reglas, permisos, parsing, transiciones, stores y servicios; **integration** para Angular + servicios, guards/routing, auth y realtime; **E2E** para flujos críticos completos. No se duplican todos los casos unitarios en navegador. Se conservan las regresiones de open redirect, sesiones anónimas, mutaciones Viewer/Analyst y RBAC de comandos.
+
+Los tests nuevos protegen clasificación HTTP, preservación del error original, logging sin datos sensibles, feedback recuperable limitado y recuperación tras fallo de overlay. Los factories realtime existentes se reutilizan en unit e E2E; las cuentas/password demo tienen una única fuente. No se añade un framework propio de testing.
+
+## Coverage
+
+```bash
+npm run test:coverage
+```
+
+La integración oficial de Angular/Vitest utiliza `@vitest/coverage-v8`. Genera texto, HTML (`coverage/sentinel/index.html`), LCOV (`coverage/sentinel/lcov.info`) y resumen JSON. [Configuración de coverage de Angular](https://angular.dev/guide/testing/code-coverage).
+
+| Métrica    | Gate mínimo |
+| ---------- | ----------- |
+| Lines      | 80 %        |
+| Statements | 80 %        |
+| Functions  | 75 %        |
+| Branches   | 70 %        |
+
+Los thresholds están en `angular.json`; un descenso por debajo provoca salida no cero. La medición inicial antes de los tests del sprint fue 83,68 % lines / 81,25 % statements / 83,23 % functions / 84,28 % branches, por encima de la base solicitada. Se incluyen módulos de UI y gráficas aunque su coverage unitario sea menor: esos flujos se complementan con E2E, no se excluyen para mejorar números.
+
+Se excluyen specs, fixtures deterministas, rutas/configuración pura, cuentas demo y tokens de configuración. El bootstrap principal, environments y bridge E2E quedan fuera del ámbito `src/app/**/*.ts`. No se excluyen servicios, stores, interceptors ni reglas de negocio.
+
+## E2E
+
+Primera instalación del navegador:
+
+```bash
+npx playwright install chromium
+npm run e2e
+```
+
+En Linux/CI: `npx playwright install --with-deps chromium`. La descarga corresponde al setup; la ejecución de los tests no necesita Internet ni APIs externas.
+
+```bash
+npm run e2e:ui
+npm run e2e:typecheck
+npm run e2e -- e2e/specs/auth.spec.ts
+npm run e2e -- --grep "viewer"
+npx playwright show-report
+```
+
+`playwright.config.ts` versiona Chromium, viewport, motion reducido y `webServer`. Playwright inicia el servidor en `127.0.0.1:4300`, espera disponibilidad y lo cierra al terminar; no requiere un `npm start` manual ni reutiliza un servidor potencialmente mal configurado. Firefox/WebKit quedan como proyectos opcionales comentados.
+
+`e2e/fixtures`, `helpers`, `pages` y `specs` separan cuentas, login reutilizable, navegación, eventos y flujos. Cada test tiene contexto/storage independientes. Se utilizan roles y labels, condiciones reales y assertions con auto-wait, sin sleeps arbitrarios ni `data-testid` generalizados. La fixture global hace fallar errores de consola, excepciones no controladas y peticiones HTTP a hosts externos.
+
+La suite cubre login/credenciales inválidas/return URL/logout + Back, RBAC por URL y comandos, dashboard/rangos/refresh/error + Retry/tema, investigación + resolución de amenazas, scan/isolate/restore y lectura sin mutaciones, Command Palette, teclado, Notification Center, persistencia y precedencia de pageSize en URL. Realtime se emite de forma determinista sin esperar ciclos de 8–15 segundos.
+
+Axe se ejecuta en tests específicos para Login, Dashboard, Threats, Devices y Settings en light/dark; también paleta, notificaciones, confirmación de dispositivo y drawer móvil. Se comprueban WCAG A/AA (incluidas 2.1/2.2) sin desactivar reglas ni excepciones globales. Un fallo genera attachment detallado y hace fallar el test. Smoke responsive a 375/1440 px protege shell, navegación, inventario y paleta. La automatización no sustituye una auditoría con lector de pantalla.
+
+## Quality checks
+
+```bash
+npm run format
+npm run format:check
+npm run lint
+npm test -- --run
+npm run test:coverage
+npm run build
+npm run e2e
+npm run quality
+```
+
+`quality` encadena format check, lint, unit/integration y build; coverage y E2E tienen comandos separados para mantener ágil el flujo local. Los budgets de producción se conservan.
+
+GlobalErrorHandler captura errores Angular y los listeners globales existentes. Logger centraliza diagnósticos de tipo/origen/categoría en desarrollo y no imprime datos en producción; no recibe mensajes, stacks, headers, tokens ni cuerpos HTTP. Se puede sustituir su adapter para observabilidad. No se integra ningún proveedor externo. Solo RecoverableUiError solicita feedback genérico, polite y limitado a uno cada 10 s; los errores inesperados no generan snackbars indiscriminados.
+
+`classifyHttpError` define contratos reutilizables para 401/403/404/429/5xx/network. El interceptor preserva la instancia original para que cada feature decida recuperación y feedback; `REPORT_HTTP_FAILURE` permite diagnóstico seguro opt-in. No crea requests, retries automáticos ni redirects globales con el backend aún simulado.
+
+## CI
+
+`.github/workflows/ci.yml` se ejecuta en push/pull_request, con permisos de lectura y cancelación de ejecuciones anteriores de la misma rama. Ambos jobs usan Node desde `.nvmrc`, npm cache de setup-node y `npm ci`.
+
+- **quality:** format check, lint, typecheck E2E, unit/integration, coverage con gates y build.
+- **e2e:** instalación Chromium + dependencias del sistema y suite Playwright.
+
+CI rechaza `test.only` y tests flaky aunque el retry diagnóstico pase. En fallos Playwright conserva traces/screenshots y sube `playwright-report`/`test-results` durante siete días; no se graba vídeo. Coverage HTML/LCOV se conserva como artifact pequeño con la misma retención. No se hace despliegue ni se requiere Codecov. [Gestión de servidor de Playwright](https://playwright.dev/docs/test-webserver).

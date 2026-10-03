@@ -1,6 +1,7 @@
 import {
   ApplicationConfig,
   EnvironmentInjector,
+  ErrorHandler,
   inject,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
@@ -15,8 +16,11 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { RealtimeService } from './core/realtime/realtime.service';
 import { MockRealtimeTransport } from './core/realtime/mock-realtime.transport';
 import { REALTIME_TRANSPORT } from './core/realtime/realtime.transport';
+import { GlobalErrorHandler } from './core/errors/global-error-handler';
+import { httpErrorInterceptor } from './core/interceptors/http-error.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
     RealtimeService,
     MockRealtimeTransport,
     { provide: REALTIME_TRANSPORT, useExisting: MockRealtimeTransport },
@@ -36,6 +40,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     { provide: AUTH_API, useExisting: MockAuthApi },
     provideAppInitializer(() => inject(AuthService).restoreSession()),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, httpErrorInterceptor])),
   ],
 };
