@@ -1,0 +1,207 @@
+﻿<a class="back-link" mat-button routerLink="/devices" queryParamsHandling="preserve"
+  >← Back to devices</a
+>
+@if (store.isLoading()) {
+  <app-page-header title="Device details" description="Loading endpoint context…" icon="devices" />
+  <div class="panel loading">
+    <app-skeleton variant="card" label="Loading device information" /><app-skeleton
+      variant="card"
+      label="Loading security posture"
+    />
+  </div>
+} @else if (store.error(); as error) {
+  <app-page-header title="Device details" icon="devices" />
+  <div class="panel state" role="alert">
+    <h2>{{ error }}</h2>
+    <button mat-flat-button (click)="store.retry()">Retry</button>
+  </div>
+} @else if (store.notFound()) {
+  <app-page-header title="Device not found" icon="devices" />
+  <div class="panel state">
+    <app-empty-state
+      title="Device not found"
+      description="This endpoint does not exist in the demo inventory."
+    /><a mat-button routerLink="/devices" queryParamsHandling="preserve">Back to devices</a>
+  </div>
+} @else if (store.data(); as device) {
+  <app-page-header [title]="device.hostname" [description]="device.displayName" icon="devices" />
+  <div class="detail-meta">
+    <app-status-indicator [status]="device.status" /><span class="risk-label"
+      >Risk <app-severity-badge [severity]="device.risk" /></span
+    ><span>{{ protections[device.protectionStatus] }}</span
+    ><span>Last seen {{ device.lastSeenAt | date: 'MMM d, y, HH:mm' }}</span
+    ><span>Last scan {{ device.lastScanAt | date: 'MMM d, y, HH:mm' }}</span>
+  </div>
+  <div class="panel">
+    <h2>Device information</h2>
+    <dl>
+      <div>
+        <dt>Device type</dt>
+        <dd>{{ device.type.replace('-', ' ') | titlecase }}</dd>
+      </div>
+      <div>
+        <dt>Operating system</dt>
+        <dd>{{ osLabels[device.operatingSystem] }}</dd>
+      </div>
+      <div>
+        <dt>OS version</dt>
+        <dd>{{ device.osVersion }}</dd>
+      </div>
+      <div>
+        <dt>IP address</dt>
+        <dd class="technical">{{ device.ipAddress }}</dd>
+      </div>
+      <div>
+        <dt>MAC address</dt>
+        <dd class="technical">{{ device.macAddress }}</dd>
+      </div>
+      <div>
+        <dt>Owner</dt>
+        <dd>{{ device.owner }}</dd>
+      </div>
+      <div>
+        <dt>Department</dt>
+        <dd>{{ device.department }}</dd>
+      </div>
+      <div>
+        <dt>Agent version</dt>
+        <dd class="technical">{{ device.agentVersion }}</dd>
+      </div>
+    </dl>
+    <div class="device-actions" #actionRegion tabindex="-1" aria-label="Device management actions">
+      @if (store.canManage()) {
+        <div class="actions">
+          @for (action of store.actions(); track action) {
+            <button mat-stroked-button (click)="act(action)" [disabled]="store.isUpdating()">
+              {{ labels[action] }}
+            </button>
+          }
+        </div>
+      } @else {
+        <p>Read-only access · Your role cannot manage endpoints.</p>
+      }
+      @if (store.isUpdating()) {
+        <p role="status">Updating device…</p>
+      }
+      @if (store.actionError(); as error) {
+        <p role="alert" class="action-error">{{ error }}</p>
+      }
+    </div>
+    <p class="demo-note">
+      Actions are simulated locally. No real scan, EDR command or network isolation occurs.
+    </p>
+  </div>
+  @if (store.posture(); as posture) {
+    <section class="panel posture">
+      <h2>Security posture</h2>
+      <div class="posture-layout">
+        <div class="score-block">
+          <strong>{{ posture.score }} <small>/ 100</small></strong
+          ><span>{{ posture.label }}</span
+          ><meter min="0" max="100" [value]="posture.score" aria-label="Security score">
+            {{ posture.score }} / 100
+          </meter>
+        </div>
+        <dl>
+          <div>
+            <dt>Protection status</dt>
+            <dd>{{ protections[device.protectionStatus] }}</dd>
+          </div>
+          <div>
+            <dt>Last scan</dt>
+            <dd>{{ device.lastScanAt | date: 'MMM d, HH:mm' }}</dd>
+          </div>
+          <div>
+            <dt>Critical vulnerabilities</dt>
+            <dd>{{ posture.criticalVulnerabilityCount }}</dd>
+          </div>
+          <div>
+            <dt>Open vulnerabilities</dt>
+            <dd>{{ posture.vulnerabilityCount }}</dd>
+          </div>
+          <div>
+            <dt>Total vulnerabilities</dt>
+            <dd>{{ device.vulnerabilities.length }}</dd>
+          </div>
+          <div>
+            <dt>Agent status / version</dt>
+            <dd>
+              {{ posture.agentOutdated ? 'Outdated' : 'Current' }} · {{ device.agentVersion }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+      <h3>Posture findings</h3>
+      <ul class="findings">
+        @for (finding of posture.findings; track finding) {
+          <li>{{ finding }}</li>
+        }
+      </ul>
+    </section>
+  }
+  <section class="panel section">
+    <div class="section-heading">
+      <h2>Vulnerabilities</h2>
+      <span>{{ device.vulnerabilities.length }} findings · Demo identifiers</span>
+    </div>
+    @if (!device.vulnerabilities.length) {
+      <p>No known vulnerabilities</p>
+    } @else {
+      <ul class="vulnerabilities">
+        @for (vulnerability of device.vulnerabilities; track vulnerability.id) {
+          <li>
+            <div>
+              <code>{{ vulnerability.cve }}</code>
+              <h3>{{ vulnerability.title }}</h3>
+              <p>{{ vulnerability.description }}</p>
+            </div>
+            <app-severity-badge [severity]="vulnerability.severity" /><span
+              >CVSS {{ vulnerability.cvss }}</span
+            ><span>{{ vulnerability.status.replace('-', ' ') | titlecase }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+  <section class="panel section">
+    <div class="section-heading">
+      <h2>Installed software</h2>
+      <span>{{ device.installedSoftware.length }} applications</span>
+    </div>
+    <label for="software-search">Search installed software</label
+    ><input
+      id="software-search"
+      type="search"
+      placeholder="Name, publisher or version"
+      [value]="softwareSearch()"
+      (input)="searchSoftware($event)"
+    />
+    <ul class="software">
+      @for (item of software(); track item.name) {
+        <li>
+          <div>
+            <h3>{{ item.name }}</h3>
+            <span>{{ item.publisher }}</span>
+          </div>
+          <code>{{ item.version }}</code>
+        </li>
+      } @empty {
+        <li>No software matches your search.</li>
+      }
+    </ul>
+  </section>
+  <section class="panel section">
+    <h2>Recent activity</h2>
+    <ol class="timeline">
+      @for (event of device.activity; track $index) {
+        <li>
+          <time [attr.datetime]="event.timestamp">{{
+            event.timestamp | date: 'MMM d, HH:mm:ss'
+          }}</time>
+          <h3>{{ event.label }}</h3>
+          <p>{{ event.description }}</p>
+        </li>
+      }
+    </ol>
+  </section>
+}

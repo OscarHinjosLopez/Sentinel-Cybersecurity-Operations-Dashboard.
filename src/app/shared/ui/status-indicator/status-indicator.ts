@@ -2,6 +2,7 @@ import { Component, computed, input } from '@angular/core';
 export type Status =
   | 'online'
   | 'offline'
+  | 'isolated'
   | 'investigating'
   | 'resolved'
   | 'active'
@@ -13,6 +14,7 @@ const states: Record<Status, { label: string; tone: 'success' | 'muted' | 'warni
   'false-positive': { label: 'False positive', tone: 'muted' },
   online: { label: 'Online', tone: 'success' },
   offline: { label: 'Offline', tone: 'muted' },
+  isolated: { label: 'Isolated', tone: 'warning' },
   investigating: { label: 'Investigating', tone: 'warning' },
   resolved: { label: 'Resolved', tone: 'success' },
   active: { label: 'Active', tone: 'info' },

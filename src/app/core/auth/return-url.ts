@@ -4,7 +4,10 @@ export function safeReturnUrl(value: string | null | undefined): string {
   if (!value || !value.startsWith('/') || value.startsWith('//') || /[\s\\]/.test(value))
     return '/dashboard';
   const path = value.split(/[?#]/, 1)[0];
-  return path && (DESTINATIONS.has(path) || /^\/threats\/THR-\d{5}$/.test(path))
+  return path &&
+    (DESTINATIONS.has(path) ||
+      /^\/threats\/THR-\d{5}$/.test(path) ||
+      /^\/devices\/DEV-\d{5}$/.test(path))
     ? value
     : '/dashboard';
 }
