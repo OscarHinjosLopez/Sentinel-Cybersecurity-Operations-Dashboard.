@@ -1,6 +1,16 @@
 import { Component, computed, input } from '@angular/core';
-export type Status = 'online' | 'offline' | 'investigating' | 'resolved' | 'active' | 'inactive';
+export type Status =
+  | 'online'
+  | 'offline'
+  | 'investigating'
+  | 'resolved'
+  | 'active'
+  | 'inactive'
+  | 'open'
+  | 'false-positive';
 const states: Record<Status, { label: string; tone: 'success' | 'muted' | 'warning' | 'info' }> = {
+  open: { label: 'Open', tone: 'info' },
+  'false-positive': { label: 'False positive', tone: 'muted' },
   online: { label: 'Online', tone: 'success' },
   offline: { label: 'Offline', tone: 'muted' },
   investigating: { label: 'Investigating', tone: 'warning' },

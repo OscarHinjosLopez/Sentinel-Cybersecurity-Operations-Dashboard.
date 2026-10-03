@@ -1,12 +1,12 @@
 # Sentinel — Cybersecurity Operations Dashboard
 
-Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye **Sprint 0 — Foundation**, **Sprint 1 — Design System + Application Shell**, **Sprint 2 — Authentication + RBAC** y **Sprint 3 — SOC Dashboard**. El dashboard utiliza datos ficticios; las demás páginas del dominio siguen siendo placeholders.
+Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye **Sprint 0 — Foundation**, **Sprint 1 — Design System + Application Shell**, **Sprint 2 — Authentication + RBAC**, **Sprint 3 — SOC Dashboard** y **Sprint 4 — Threat Management**. Dashboard y amenazas utilizan datos ficticios; las demás páginas del dominio siguen siendo placeholders.
 
 ## Stack
 
 - Angular 22 y TypeScript 6 con `strict` y `strictTemplates`.
 - Componentes standalone y Angular zoneless, activado por defecto en Angular 22; sin Zone.js.
-- Angular Signals para tema, autenticación y dashboard; RxJS para los contratos de acceso a datos mock.
+- Angular Signals para tema, autenticación, dashboard y amenazas; RxJS para los contratos de acceso a datos mock.
 - Apache ECharts integrado directamente con renderer SVG y módulos específicos, cargado con el dashboard.
 - Angular Material 22, Angular CDK 22 y SCSS.
 - Vitest 5 con el builder oficial de Angular y jsdom.
@@ -184,7 +184,7 @@ La fuente de verdad es `core/auth/permissions.ts`. Usar hasPermission para decis
 
 Las cinco rutas declaran `data.permission`. AuthGuard protege el shell y cada navegación hija; GuestGuard evita que una sesión autenticada vuelva a login; PermissionGuard redirige a `/forbidden` cuando falta el permiso. La sidebar filtra su fuente existente usando esos mismos permisos. Los permisos de investigate/manage quedan definidos sin implementar acciones del dominio.
 
-Return URL acepta únicamente `/dashboard`, `/threats`, `/devices`, `/audit` y `/settings`, con query/fragment opcionales. Rechaza hosts externos, esquemas, backslashes, outlets y destinos no admitidos. Tras el login, los guards vuelven a comprobar el permiso del destino.
+Return URL acepta `/dashboard`, `/threats`, `/threats/THR-00001` (ID de cinco dígitos), `/devices`, `/audit` y `/settings`, con query/fragment opcionales. Rechaza hosts externos, esquemas, backslashes, outlets y destinos no admitidos. Tras el login, los guards vuelven a comprobar el permiso del destino.
 
 ### Interceptor preparado para REST
 
@@ -216,7 +216,7 @@ sessionStorage es una decisión temporal para este portfolio, accesible a JavaSc
 5. Revisar 375, 768, 1024 y 1440 px, consola, Tab, foco visible y salto al contenido.
 6. En móvil abrir el drawer, recorrerlo con Tab y cerrarlo mediante Escape, backdrop y navegación.
 
-La aplicación incluye autenticación y RBAC frontend mock y un dashboard SOC de demostración. No incluye backend, JWT real, API real ni WebSockets.
+La aplicación incluye autenticación y RBAC frontend mock, un dashboard SOC y gestión de amenazas de demostración. No incluye backend, JWT real, API real ni WebSockets.
 
 ## SOC Dashboard — Sprint 3
 
@@ -233,3 +233,29 @@ Las gráficas siguen los tokens del tema, observan el tamaño del contenedor con
 Para probar los estados sin controles de desarrollo visibles, los tests sustituyen `DASHBOARD_REPOSITORY` o configuran `DASHBOARD_MOCK_CONFIG` con `{ latency: 0, scenario: 'error' }` o `scenario: 'empty'`. El escenario por defecto es `success`. Loading usa Skeleton, vacío usa EmptyState y error ofrece Retry sin detalles internos.
 
 Verificación del dashboard: cambiar los tres rangos, hacer refresh, abrir los datos textuales, navegar a View all threats y alternar light/dark a 375, 768, 1024 y 1440 px. Los tests cubren coherencia de datos, estados, retry, cancelación, destrucción y tendencias. ECharts utiliza licencia Apache-2.0; referencia de integración: [documentación oficial](https://echarts.apache.org/handbook/en/basics/import/).
+
+## Threat Management — Sprint 4
+
+`features/threats` contiene modelos, repository y stores en `data-access`, el detalle en `pages`, confirmación en `ui`, reglas y serialización en `utils` y rutas lazy en `threats.routes.ts`. El listado permanece en la raíz de la feature. No se añaden dependencias.
+
+`ThreatRepository` ofrece `list(query)`, `getById(id)` y `updateStatus(id, status)` mediante Observable y el token `THREAT_REPOSITORY`. `MockThreatRepository` genera 200 amenazas ficticias, deterministas para una fecha dada, con 450 ms de latencia. Filtra y ordena todo el conjunto antes de paginar. Los cambios reemplazan objetos inmutables y actualizan su timeline. Las mutaciones son locales/mock: se conservan al navegar entre lista y detalle durante la ejecución, se reinician al recargar y no afectan sistemas de seguridad reales. El dashboard utiliza un conjunto de demostración independiente.
+
+La búsqueda cubre ID, título, source y target, con debounce de 300 ms y limpieza explícita. Los selectores filtran severidad, estado y vector; chips muestran y permiten retirar filtros activos. Se ordena por detección, prioridad de severidad, estado o confianza. Severity descendente coloca Critical primero. Status ascendente sigue Open → Investigating → Resolved → False positive. Paginación de 10, 25 (default) o 50 filas, con conteo y controles accesibles; filtros, búsqueda, orden y page size vuelven a página 1. Refresh conserva la consulta y muestra feedback.
+
+Query params soportados: `search`, `severity`, `status`, `vector`, `page`, `pageSize`, `sort`, `direction`; también fechas ISO opcionales `from` y `to`. Severity/status/vector aceptan valores separados por comas desde la URL, representados como múltiples filtros y chips; los selectores de la interfaz eligen un valor cada vez. Valores desconocidos, páginas negativas/fraccionarias/excesivas, tamaños no admitidos y fechas inválidas se normalizan con reemplazo de URL. Los defaults válidos explícitos se conservan al cargar una URL. La recarga, enlaces copiados y Back/Forward restauran el estado visual. Una página positiva sin registros conserva su URL y ofrece First page.
+
+```text
+/threats?severity=critical&status=investigating&page=2
+/threats?search=Identity&pageSize=10&sort=confidence&direction=desc
+/threats/THR-00001
+```
+
+`ThreatListStore` usa Signals/computed para consulta, datos, total, loading, refreshing y error; cancela solicitudes antiguas y temporizadores pendientes cuando cambia el estado o se destruye. `ThreatDetailStore` carga directamente por ID, cancela cargas/mutaciones al cambiar de amenaza y bloquea doble envío. La tabla HTML semántica incluye `aria-sort` y enlaces de detalle; tablet reduce columnas secundarias y móvil presenta tarjetas con la misma fuente de datos. Back to threats conserva los filtros que acompañaban al enlace.
+
+El detalle muestra contexto, descripción, indicadores técnicos sin enlaces externos y timeline local. Admin y Analyst pueden iniciar investigación; desde Investigating pueden resolver o marcar false positive. Open también permite false positive. Resolved y False positive son terminales en esta demo. Las reglas están centralizadas en `threat-rules.ts`; Resolve y False positive requieren Material Dialog, con foco inicial en Cancel y restauración al cerrar. Las acciones muestran loading, error local y Snackbar de éxito. Viewer tiene acceso de lectura y no puede mutar: tanto el store como el repository comprueban `threats:investigate`, incluso al completar una solicitud pendiente.
+
+Loading utiliza Skeleton; errores de lista/detalle ofrecen Retry sin detalles internos; vacío general y sin coincidencias tienen mensajes distintos. Un ID desconocido muestra Threat not found con retorno al listado. Para tests internos, `THREAT_MOCK_CONFIG` permite `{ latency: 0, scenario: 'error' }` o `scenario: 'empty'`, sin botones de desarrollo visibles.
+
+Verificación: probar búsqueda, cada filtro, chips, sort, tamaños de página y Next/Previous; recargar la primera URL del ejemplo y recorrer Back/Forward. Abrir un detalle directamente y un ID inexistente. Con Admin/Analyst iniciar investigación y confirmar/cancelar cierre; con Viewer comprobar solo lectura. Revisar listado, detalle y dialog a 375, 768, 1024 y 1440 px en light/dark. Los tests cubren repository, debounce, cancelación, stores, estados, query params, reglas, autorización y regresión de selects restaurados.
+
+Sprint 5 no está implementado: no hay acciones masivas, exportaciones, inventario de dispositivos, comentarios, asignaciones, auditoría global, WebSockets ni actualización automática.

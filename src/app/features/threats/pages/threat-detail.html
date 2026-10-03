@@ -1,0 +1,125 @@
+﻿<a class="back-link" mat-button routerLink="/threats" queryParamsHandling="preserve"
+  >← Back to threats</a
+>
+@if (store.isLoading()) {
+  <app-page-header
+    title="Threat details"
+    description="Loading investigation context…"
+    icon="threats"
+  />
+  <div class="panel loading">
+    <app-skeleton variant="card" label="Loading threat details" /><app-skeleton
+      variant="card"
+      label="Loading indicators and timeline"
+    />
+  </div>
+} @else if (store.error(); as error) {
+  <app-page-header title="Threat details" icon="threats" />
+  <div class="panel state" role="alert">
+    <h2>{{ error }}</h2>
+    <button mat-flat-button (click)="store.retry()">Retry</button>
+  </div>
+} @else if (store.notFound()) {
+  <app-page-header title="Threat not found" icon="threats" />
+  <div class="panel state">
+    <app-empty-state
+      title="Threat not found"
+      description="This threat does not exist in the demo dataset. Return to the list to choose another detection."
+    /><a mat-button routerLink="/threats" queryParamsHandling="preserve">Back to threats</a>
+  </div>
+} @else if (store.data(); as threat) {
+  <app-page-header [title]="threat.title" [description]="threat.id" icon="threats" />
+  <div class="detail-meta">
+    <app-severity-badge [severity]="threat.severity" /><app-status-indicator
+      [status]="threat.status"
+    /><span>Detected {{ threat.detectedAt | date: 'MMM d, y, HH:mm' }}</span
+    ><span>Last updated {{ threat.updatedAt | date: 'MMM d, y, HH:mm' }}</span>
+  </div>
+  <div class="panel overview">
+    <h2>Detection Overview</h2>
+    <dl>
+      <div>
+        <dt>Source</dt>
+        <dd class="technical">{{ threat.source }}</dd>
+      </div>
+      <div>
+        <dt>Target</dt>
+        <dd>{{ threat.target }}</dd>
+      </div>
+      <div>
+        <dt>Attack vector</dt>
+        <dd>{{ vectors[threat.vector] }}</dd>
+      </div>
+      <div>
+        <dt>Confidence</dt>
+        <dd>{{ threat.confidence }} / 100</dd>
+      </div>
+      <div>
+        <dt>Detected</dt>
+        <dd>{{ threat.detectedAt | date: 'MMM d, y, HH:mm' }}</dd>
+      </div>
+      <div>
+        <dt>Last updated</dt>
+        <dd>{{ threat.updatedAt | date: 'MMM d, y, HH:mm' }}</dd>
+      </div>
+    </dl>
+    <h3>Description</h3>
+    <p>{{ threat.description }}</p>
+    <div class="investigation" #actionRegion tabindex="-1" aria-label="Investigation actions">
+      @if (!store.canInvestigate()) {
+        <p class="read-only">Read-only access · Your role can view investigation details.</p>
+      } @else if (store.actions().length) {
+        <div class="actions">
+          @for (status of store.actions(); track status) {
+            <button mat-stroked-button (click)="act(status)" [disabled]="store.isUpdating()">
+              {{ actionLabels[status] }}
+            </button>
+          }
+        </div>
+      } @else {
+        <p>This investigation is closed.</p>
+      }
+      @if (store.isUpdating()) {
+        <p role="status">Updating threat status…</p>
+      }
+      @if (store.actionError(); as error) {
+        <p role="alert" class="action-error">{{ error }}</p>
+      }
+    </div>
+    <p class="demo-note">
+      Demo environment · Status changes are simulated and reset when the application reloads.
+    </p>
+  </div>
+  <div class="detail-grid">
+    <section class="panel">
+      <h2>Indicators</h2>
+      <ul class="indicators">
+        @for (indicator of threat.indicators; track $index) {
+          <li>
+            <span>{{ indicator.type }}</span
+            ><code>{{ indicator.value }}</code>
+          </li>
+        }
+      </ul>
+    </section>
+    <section class="panel">
+      <h2>Investigation Timeline</h2>
+      <ol class="timeline">
+        @for (event of threat.timeline; track $index) {
+          <li>
+            <time [attr.datetime]="event.timestamp">{{
+              event.timestamp | date: 'MMM d, HH:mm:ss'
+            }}</time>
+            <h3>{{ event.label }}</h3>
+            @if (event.description) {
+              <p>{{ event.description }}</p>
+            }
+            @if (event.actor) {
+              <span>{{ event.actor }}</span>
+            }
+          </li>
+        }
+      </ol>
+    </section>
+  </div>
+}

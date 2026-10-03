@@ -1,16 +1,300 @@
-<app-page-header
+﻿<app-page-header
   title="Threats"
   description="Investigate and manage detected security threats."
   icon="threats"
-/>
-<section class="workspace-panel" aria-labelledby="threats-workspace">
-  <div class="panel-header">
-    <h2 id="threats-workspace">Threats workspace</h2>
-    <span class="preview-label">Workspace preview</span>
+  ><div page-header-actions>
+    <button mat-stroked-button (click)="store.load()" [disabled]="store.isLoading()">
+      {{ store.isLoading() ? 'Updating…' : 'Refresh' }}
+    </button>
+  </div></app-page-header
+>
+<p class="demo-note">Demo environment · Investigation changes are local and simulated.</p>
+<section class="filter-panel" aria-label="Threat filters">
+  <div class="search-field">
+    <label for="threat-search">Search threats</label>
+    <div class="search-control">
+      <input
+        id="threat-search"
+        type="search"
+        placeholder="Search threats..."
+        [value]="searchText()"
+        (input)="inputSearch($event)"
+        maxlength="200"
+      /><button
+        mat-button
+        (click)="clearSearch()"
+        [disabled]="!searchText()"
+        aria-label="Clear search"
+      >
+        Clear
+      </button>
+    </div>
   </div>
-  <app-empty-state
-    icon="threats"
-    title="Threat workspace ready"
-    description="Threat investigation will be available in a future sprint. No threat data is connected."
-  />
+  <div>
+    <label for="severity-filter">Severity</label
+    ><select
+      id="severity-filter"
+      [ngModel]="
+        store.query().severities.length > 1 ? 'multiple' : store.query().severities[0] || ''
+      "
+      (change)="filter('severity', $event)"
+    >
+      <option value="">All severities</option>
+      @if (store.query().severities.length > 1) {
+        <option value="multiple" disabled>Multiple severities</option>
+      }
+      @for (severity of severities; track severity) {
+        <option [value]="severity">{{ severity | titlecase }}</option>
+      }
+    </select>
+  </div>
+  <div>
+    <label for="status-filter">Status</label
+    ><select
+      id="status-filter"
+      [ngModel]="store.query().statuses.length > 1 ? 'multiple' : store.query().statuses[0] || ''"
+      (change)="filter('status', $event)"
+    >
+      <option value="">All statuses</option>
+      @if (store.query().statuses.length > 1) {
+        <option value="multiple" disabled>Multiple statuses</option>
+      }
+      @for (status of statuses; track status) {
+        <option [value]="status">{{ statusLabels[status] }}</option>
+      }
+    </select>
+  </div>
+  <div>
+    <label for="vector-filter">Vector</label
+    ><select
+      id="vector-filter"
+      [ngModel]="store.query().vectors.length > 1 ? 'multiple' : store.query().vectors[0] || ''"
+      (change)="filter('vector', $event)"
+    >
+      <option value="">All vectors</option>
+      @if (store.query().vectors.length > 1) {
+        <option value="multiple" disabled>Multiple vectors</option>
+      }
+      @for (vector of vectors; track vector) {
+        <option [value]="vector">{{ vectorLabels[vector] }}</option>
+      }
+    </select>
+  </div>
 </section>
+@if (store.hasFilters()) {
+  <div class="filter-chips" aria-label="Active filters">
+    @if (store.query().search) {
+      <button (click)="clearSearch()" aria-label="Remove search filter">
+        Search: {{ store.query().search }} ×
+      </button>
+    }
+    @for (severity of store.query().severities; track severity) {
+      <button
+        (click)="removeSeverity(severity)"
+        [attr.aria-label]="'Remove ' + severity + ' severity filter'"
+      >
+        {{ severity | titlecase }} ×
+      </button>
+    }
+    @for (status of store.query().statuses; track status) {
+      <button
+        (click)="removeStatus(status)"
+        [attr.aria-label]="'Remove ' + statusLabels[status] + ' status filter'"
+      >
+        {{ statusLabels[status] }} ×
+      </button>
+    }
+    @for (vector of store.query().vectors; track vector) {
+      <button
+        (click)="removeVector(vector)"
+        [attr.aria-label]="'Remove ' + vectorLabels[vector] + ' vector filter'"
+      >
+        {{ vectorLabels[vector] }} ×
+      </button>
+    }
+    @if (store.query().dateFrom || store.query().dateTo) {
+      <button (click)="store.setDates()" aria-label="Remove date filter">
+        {{ store.query().dateFrom || 'Any date' }} – {{ store.query().dateTo || 'Today' }} ×
+      </button>
+    }
+    <button (click)="reset()">Clear all</button>
+  </div>
+}
+<div class="list-meta">
+  <span role="status">{{
+    store.isLoading() ? 'Loading threats…' : store.total() + ' threats'
+  }}</span>
+  <div class="mobile-sort">
+    <label for="mobile-sort">Sort</label
+    ><select id="mobile-sort" (change)="sortFromSelect($event)" [ngModel]="store.query().sortBy">
+      @for (sort of sorts; track sort.key) {
+        <option [value]="sort.key">{{ sort.label }}</option>
+      }</select
+    ><button
+      mat-button
+      (click)="store.setSort(store.query().sortBy)"
+      [attr.aria-label]="'Toggle sort direction'"
+    >
+      {{ store.query().sortDirection === 'desc' ? '↓ Desc' : '↑ Asc' }}
+    </button>
+  </div>
+</div>
+<section class="results" aria-label="Threat results" [attr.aria-busy]="store.isLoading()">
+  @if (store.error(); as error) {
+    <div class="state" role="alert">
+      <h2>{{ error }}</h2>
+      <button mat-flat-button (click)="store.retry()">Retry</button>
+    </div>
+  } @else if (store.isLoading() && !store.isRefreshing()) {
+    <div class="loading-rows">
+      @for (row of [1, 2, 3, 4, 5, 6]; track row) {
+        <app-skeleton variant="card" label="Loading threat records" />
+      }
+    </div>
+  } @else if (!store.data().length) {
+    <div class="state">
+      @if (store.total() && store.query().page > 1) {
+        <app-empty-state
+          title="No threats on this page"
+          description="Choose the first page to see matching threats."
+        /><button mat-button (click)="store.setPage(1)">First page</button>
+      } @else {
+        <app-empty-state
+          icon="threats"
+          [title]="store.hasFilters() ? 'No threats match your filters' : 'No threats detected'"
+          [description]="
+            store.hasFilters()
+              ? 'Try a different search or clear the active filters.'
+              : 'Threats will appear here when monitoring detects security activity.'
+          "
+        />
+        @if (store.hasFilters()) {
+          <button mat-button (click)="reset()">Clear filters</button>
+        }
+      }
+    </div>
+  } @else {
+    <div class="table-scroll" [class.refreshing]="store.isRefreshing()">
+      <table>
+        <caption class="sr-only">
+          Security threats. Sortable columns have buttons in their headers.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Threat</th>
+            <th scope="col" [attr.aria-sort]="ariaSort('severity')">
+              <button (click)="store.setSort('severity')">
+                Severity {{ sortArrow('severity') }}
+              </button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort('status')">
+              <button (click)="store.setSort('status')">Status {{ sortArrow('status') }}</button>
+            </th>
+            <th scope="col" class="secondary">Source</th>
+            <th scope="col" class="secondary">Target</th>
+            <th scope="col" class="secondary">Vector</th>
+            <th scope="col" [attr.aria-sort]="ariaSort('confidence')">
+              <button (click)="store.setSort('confidence')">
+                Confidence {{ sortArrow('confidence') }}
+              </button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort('detectedAt')">
+              <button (click)="store.setSort('detectedAt')">
+                Detected {{ sortArrow('detectedAt') }}
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (threat of store.data(); track threat.id) {
+            <tr>
+              <td>
+                <a [routerLink]="['/threats', threat.id]" [queryParams]="params(store.query())"
+                  ><span class="threat-id">{{ threat.id }}</span
+                  ><strong>{{ threat.title }}</strong></a
+                >
+              </td>
+              <td><app-severity-badge [severity]="threat.severity" /></td>
+              <td><app-status-indicator [status]="threat.status" /></td>
+              <td class="secondary technical">{{ threat.source }}</td>
+              <td class="secondary">{{ threat.target }}</td>
+              <td class="secondary">{{ vectorLabels[threat.vector] }}</td>
+              <td>{{ threat.confidence }}%</td>
+              <td>
+                <time [attr.datetime]="threat.detectedAt">{{
+                  threat.detectedAt | date: 'MMM d, HH:mm'
+                }}</time>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <ul class="mobile-list">
+      @for (threat of store.data(); track threat.id) {
+        <li>
+          <div class="card-top">
+            <app-severity-badge [severity]="threat.severity" /><app-status-indicator
+              [status]="threat.status"
+            />
+          </div>
+          <a [routerLink]="['/threats', threat.id]" [queryParams]="params(store.query())"
+            ><span class="threat-id">{{ threat.id }}</span
+            ><strong>{{ threat.title }}</strong></a
+          >
+          <dl>
+            <div>
+              <dt>Source</dt>
+              <dd class="technical">{{ threat.source }}</dd>
+            </div>
+            <div>
+              <dt>Target</dt>
+              <dd>{{ threat.target }}</dd>
+            </div>
+            <div>
+              <dt>Vector</dt>
+              <dd>{{ vectorLabels[threat.vector] }}</dd>
+            </div>
+            <div>
+              <dt>Confidence</dt>
+              <dd>{{ threat.confidence }}%</dd>
+            </div>
+            <div>
+              <dt>Detected</dt>
+              <dd>{{ threat.detectedAt | date: 'MMM d, HH:mm' }}</dd>
+            </div>
+          </dl>
+        </li>
+      }
+    </ul>
+  }
+</section>
+<nav class="pagination" aria-label="Threat pagination">
+  <div>
+    <label for="threat-page-size">Rows per page</label
+    ><select id="threat-page-size" [ngModel]="store.query().pageSize" (change)="pageSize($event)">
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="50">50</option>
+    </select>
+  </div>
+  <span>{{ store.start() }}–{{ store.end() }} of {{ store.total() }}</span>
+  <div>
+    <button
+      mat-button
+      aria-label="Previous page"
+      (click)="store.setPage(store.query().page - 1)"
+      [disabled]="store.isLoading() || store.query().page === 1"
+    >
+      Previous</button
+    ><span>Page {{ store.query().page }}</span
+    ><button
+      mat-button
+      aria-label="Next page"
+      (click)="store.setPage(store.query().page + 1)"
+      [disabled]="store.isLoading() || store.query().page >= store.pageCount()"
+    >
+      Next
+    </button>
+  </div>
+</nav>
