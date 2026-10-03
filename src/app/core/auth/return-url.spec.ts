@@ -1,5 +1,14 @@
 import { safeReturnUrl } from './return-url';
 
+describe('Device detail return URLs', () => {
+  it('allows a supported device detail after login', () =>
+    expect(safeReturnUrl('/devices/DEV-00142?risk=high')).toBe('/devices/DEV-00142?risk=high'));
+  it.each(['/devices/../../login', '/devices/DEV-00142/extra', '//evil.test/devices/DEV-00142'])(
+    'rejects unsupported device destinations %s',
+    (value) => expect(safeReturnUrl(value)).toBe('/dashboard'),
+  );
+});
+
 describe('Threat detail return URLs', () => {
   it('preserves valid internal threat detail destinations after login', () =>
     expect(safeReturnUrl('/threats/THR-00001?status=open')).toBe('/threats/THR-00001?status=open'));

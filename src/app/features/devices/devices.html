@@ -1,16 +1,321 @@
-<app-page-header
+﻿<app-page-header
   title="Devices"
-  description="Monitor the security posture of connected devices."
+  description="Endpoint inventory and security posture across your organization."
   icon="devices"
-/>
-<section class="workspace-panel" aria-labelledby="devices-workspace">
-  <div class="panel-header">
-    <h2 id="devices-workspace">Devices workspace</h2>
-    <span class="preview-label">Workspace preview</span>
+  ><div page-header-actions>
+    <button mat-stroked-button (click)="store.load()" [disabled]="store.isLoading()">
+      {{ store.isLoading() ? 'Updating…' : 'Refresh' }}
+    </button>
+  </div></app-page-header
+>
+<p class="demo-note">Demo inventory · All device actions are local simulations.</p>
+@if (store.summary(); as summary) {
+  <dl class="inventory-summary" aria-label="Inventory summary for matching devices">
+    <div>
+      <dt>Total devices</dt>
+      <dd>{{ summary.total }}</dd>
+    </div>
+    <div>
+      <dt>Protected</dt>
+      <dd>{{ summary.protected }}</dd>
+    </div>
+    <div>
+      <dt>At risk / unprotected</dt>
+      <dd>{{ summary.atRisk }}</dd>
+    </div>
+    <div>
+      <dt>Offline</dt>
+      <dd>{{ summary.offline }}</dd>
+    </div>
+    <div>
+      <dt>Critical risk</dt>
+      <dd>{{ summary.criticalRisk }}</dd>
+    </div>
+  </dl>
+}
+<section class="filter-panel" aria-label="Device filters">
+  <div class="search-field">
+    <label for="device-search">Search devices</label>
+    <div class="search-control">
+      <input
+        id="device-search"
+        type="search"
+        placeholder="Search devices..."
+        [value]="searchText()"
+        (input)="inputSearch($event)"
+        maxlength="200"
+      /><button
+        mat-button
+        aria-label="Clear search"
+        (click)="clearSearch()"
+        [disabled]="!searchText()"
+      >
+        Clear
+      </button>
+    </div>
   </div>
-  <app-empty-state
-    icon="devices"
-    title="Device workspace ready"
-    description="Device monitoring will be available in a future sprint. No device inventory is connected."
-  />
+  <div>
+    <label for="device-status">Status</label
+    ><select
+      id="device-status"
+      [ngModel]="store.query().status"
+      (change)="filter('status', $event)"
+    >
+      <option value="">All statuses</option>
+      @for (value of statuses; track value) {
+        <option [value]="value">{{ value | titlecase }}</option>
+      }
+    </select>
+  </div>
+  <div>
+    <label for="device-risk">Risk</label
+    ><select id="device-risk" [ngModel]="store.query().risk" (change)="filter('risk', $event)">
+      <option value="">All risks</option>
+      @for (value of risks; track value) {
+        <option [value]="value">{{ value | titlecase }}</option>
+      }
+    </select>
+  </div>
+  <div>
+    <label for="device-protection">Protection</label
+    ><select
+      id="device-protection"
+      [ngModel]="store.query().protection"
+      (change)="filter('protection', $event)"
+    >
+      <option value="">All protection</option>
+      @for (value of protections; track value) {
+        <option [value]="value">{{ protectionLabels[value] }}</option>
+      }
+    </select>
+  </div>
+  <div>
+    <label for="device-os">Operating system</label
+    ><select id="device-os" [ngModel]="store.query().os" (change)="filter('os', $event)">
+      <option value="">All systems</option>
+      @for (value of operatingSystems; track value) {
+        <option [value]="value">{{ osLabels[value] }}</option>
+      }
+    </select>
+  </div>
 </section>
+@if (store.hasFilters()) {
+  <div class="filter-chips" aria-label="Active filters">
+    @if (store.query().search) {
+      <button aria-label="Remove search filter" (click)="clearSearch()">
+        Search: {{ store.query().search }} ×
+      </button>
+    }
+    @if (store.query().status) {
+      <button
+        [attr.aria-label]="'Remove ' + store.query().status + ' status filter'"
+        (click)="store.setStatusFilter('')"
+      >
+        {{ store.query().status | titlecase }} ×
+      </button>
+    }
+    @if (store.query().risk) {
+      <button
+        [attr.aria-label]="'Remove ' + store.query().risk + ' risk filter'"
+        (click)="store.setRiskFilter('')"
+      >
+        {{ store.query().risk | titlecase }} risk ×
+      </button>
+    }
+    @if (store.query().protection; as protection) {
+      <button
+        [attr.aria-label]="'Remove ' + protectionLabels[protection] + ' protection filter'"
+        (click)="store.setProtectionFilter('')"
+      >
+        {{ protectionLabels[protection] }} ×
+      </button>
+    }
+    @if (store.query().os; as os) {
+      <button
+        [attr.aria-label]="'Remove ' + osLabels[os] + ' operating system filter'"
+        (click)="store.setOsFilter('')"
+      >
+        {{ osLabels[os] }} ×
+      </button>
+    }
+    <button (click)="store.resetFilters()">Clear all</button>
+  </div>
+}
+<div class="list-meta">
+  <span role="status">{{
+    store.isLoading() ? 'Loading devices…' : store.total() + ' matching devices'
+  }}</span>
+  <div class="sort-control">
+    <label for="device-sort">Sort by</label
+    ><select id="device-sort" [ngModel]="store.query().sortBy" (change)="sort($event)">
+      @for (sort of sorts; track sort.key) {
+        <option [value]="sort.key">{{ sort.label }}</option>
+      }</select
+    ><button
+      mat-button
+      aria-label="Toggle sort direction"
+      (click)="store.setSort(store.query().sortBy)"
+    >
+      {{ store.query().sortDirection === 'asc' ? '↑ Asc' : '↓ Desc' }}
+    </button>
+  </div>
+</div>
+<section class="results" aria-label="Device results" [attr.aria-busy]="store.isLoading()">
+  @if (store.error(); as error) {
+    <div class="state" role="alert">
+      <h2>{{ error }}</h2>
+      <button mat-flat-button (click)="store.retry()">Retry</button>
+    </div>
+  } @else if (store.isLoading() && !store.isRefreshing()) {
+    <div class="loading-rows">
+      @for (row of [1, 2, 3, 4, 5, 6]; track row) {
+        <app-skeleton variant="card" label="Loading device inventory" />
+      }
+    </div>
+  } @else if (!store.data().length) {
+    <div class="state">
+      @if (store.total() && store.query().page > 1) {
+        <app-empty-state
+          title="No devices on this page"
+          description="Choose the first page to see matching endpoints."
+        /><button mat-button (click)="store.setPage(1)">First page</button>
+      } @else {
+        <app-empty-state
+          icon="devices"
+          [title]="store.hasFilters() ? 'No devices match your filters' : 'No devices enrolled'"
+          [description]="
+            store.hasFilters()
+              ? 'Try another search or clear the active filters.'
+              : 'Enrolled endpoints will appear in the device inventory.'
+          "
+        />
+        @if (store.hasFilters()) {
+          <button mat-button (click)="store.resetFilters()">Clear filters</button>
+        }
+      }
+    </div>
+  } @else {
+    <div class="table-scroll" [class.refreshing]="store.isRefreshing()">
+      <table>
+        <caption class="sr-only">
+          Device inventory. Sortable columns have buttons in their headers.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col" [attr.aria-sort]="ariaSort('hostname')">
+              <button (click)="store.setSort('hostname')">Device {{ arrow('hostname') }}</button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort('status')">
+              <button (click)="store.setSort('status')">Status {{ arrow('status') }}</button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort('risk')">
+              <button (click)="store.setSort('risk')">Risk {{ arrow('risk') }}</button>
+            </th>
+            <th scope="col">Protection</th>
+            <th scope="col" class="secondary">OS</th>
+            <th scope="col" class="secondary">Owner</th>
+            <th scope="col" [attr.aria-sort]="ariaSort('securityScore')">
+              <button (click)="store.setSort('securityScore')">
+                Security score {{ arrow('securityScore') }}
+              </button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort('lastSeenAt')">
+              <button (click)="store.setSort('lastSeenAt')">
+                Last seen {{ arrow('lastSeenAt') }}
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (device of store.data(); track device.id) {
+            <tr>
+              <td>
+                <a [routerLink]="['/devices', device.id]" [queryParams]="params(store.query())"
+                  ><strong>{{ device.hostname }}</strong
+                  ><span class="device-display">{{ device.displayName }}</span></a
+                >
+              </td>
+              <td><app-status-indicator [status]="device.status" /></td>
+              <td><app-severity-badge [severity]="device.risk" /></td>
+              <td>{{ protectionLabels[device.protectionStatus] }}</td>
+              <td class="secondary">{{ device.osVersion }}</td>
+              <td class="secondary">{{ device.owner }}</td>
+              <td><app-device-score [value]="device.securityScore" /></td>
+              <td>
+                <time [attr.datetime]="device.lastSeenAt">{{
+                  device.lastSeenAt | date: 'MMM d, HH:mm'
+                }}</time>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <ul class="mobile-list">
+      @for (device of store.data(); track device.id) {
+        <li>
+          <div class="card-top">
+            <app-status-indicator [status]="device.status" /><span class="risk-label"
+              >Risk <app-severity-badge [severity]="device.risk"
+            /></span>
+          </div>
+          <a [routerLink]="['/devices', device.id]" [queryParams]="params(store.query())"
+            ><strong>{{ device.hostname }}</strong
+            ><span class="device-display">{{ device.displayName }}</span></a
+          >
+          <dl>
+            <div>
+              <dt>Protection</dt>
+              <dd>{{ protectionLabels[device.protectionStatus] }}</dd>
+            </div>
+            <div>
+              <dt>Security score</dt>
+              <dd><app-device-score [value]="device.securityScore" /></dd>
+            </div>
+            <div>
+              <dt>Operating system</dt>
+              <dd>{{ device.osVersion }}</dd>
+            </div>
+            <div>
+              <dt>Owner</dt>
+              <dd>{{ device.owner }}</dd>
+            </div>
+            <div>
+              <dt>Last seen</dt>
+              <dd>{{ device.lastSeenAt | date: 'MMM d, HH:mm' }}</dd>
+            </div>
+          </dl>
+        </li>
+      }
+    </ul>
+  }
+</section>
+<nav class="pagination" aria-label="Device pagination">
+  <div>
+    <label for="device-page-size">Rows per page</label
+    ><select id="device-page-size" [ngModel]="store.query().pageSize" (change)="pageSize($event)">
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="50">50</option>
+    </select>
+  </div>
+  <span>{{ store.start() }}–{{ store.end() }} of {{ store.total() }}</span>
+  <div>
+    <button
+      mat-button
+      aria-label="Previous page"
+      (click)="store.setPage(store.query().page - 1)"
+      [disabled]="store.isLoading() || store.query().page === 1"
+    >
+      Previous</button
+    ><span>Page {{ store.query().page }}</span
+    ><button
+      mat-button
+      aria-label="Next page"
+      (click)="store.setPage(store.query().page + 1)"
+      [disabled]="store.isLoading() || store.query().page >= store.pageCount()"
+    >
+      Next
+    </button>
+  </div>
+</nav>

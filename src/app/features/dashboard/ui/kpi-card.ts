@@ -2,6 +2,7 @@ import { Component, computed, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Icon } from '../../../shared/ui/icon/icon';
 import { KpiMetric } from '../models/dashboard.models';
+import { securityScoreLabel } from '../../../shared/utils/security-score';
 @Component({
   selector: 'app-kpi-card',
   imports: [DecimalPipe, Icon],
@@ -102,14 +103,7 @@ export class KpiCard {
     const metric = this.metric();
     if (metric.id === 'protected' && metric.supplementaryValue)
       return `${((metric.value / metric.supplementaryValue) * 100).toFixed(1)}% of fleet protected`;
-    if (metric.id === 'score')
-      return metric.value >= 90
-        ? 'Excellent'
-        : metric.value >= 75
-          ? 'Good'
-          : metric.value >= 50
-            ? 'Needs attention'
-            : 'Critical';
+    if (metric.id === 'score') return securityScoreLabel(metric.value);
     return metric.detail;
   });
 }

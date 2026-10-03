@@ -1,12 +1,12 @@
 # Sentinel — Cybersecurity Operations Dashboard
 
-Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye **Sprint 0 — Foundation**, **Sprint 1 — Design System + Application Shell**, **Sprint 2 — Authentication + RBAC**, **Sprint 3 — SOC Dashboard** y **Sprint 4 — Threat Management**. Dashboard y amenazas utilizan datos ficticios; las demás páginas del dominio siguen siendo placeholders.
+Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye los Sprints **0 — Foundation**, **1 — Design System + Application Shell**, **2 — Authentication + RBAC**, **3 — SOC Dashboard**, **4 — Threat Management** y **5 — Device Inventory**. Dashboard, amenazas y dispositivos utilizan datos ficticios; Audit y Settings siguen siendo placeholders.
 
 ## Stack
 
 - Angular 22 y TypeScript 6 con `strict` y `strictTemplates`.
 - Componentes standalone y Angular zoneless, activado por defecto en Angular 22; sin Zone.js.
-- Angular Signals para tema, autenticación, dashboard y amenazas; RxJS para los contratos de acceso a datos mock.
+- Angular Signals para tema, autenticación, dashboard, amenazas y dispositivos; RxJS para los contratos de acceso a datos mock.
 - Apache ECharts integrado directamente con renderer SVG y módulos específicos, cargado con el dashboard.
 - Angular Material 22, Angular CDK 22 y SCSS.
 - Vitest 5 con el builder oficial de Angular y jsdom.
@@ -129,18 +129,18 @@ Los tokens se centralizan en `src/styles/_tokens.scss`: superficies, bordes, niv
 
 Los componentes standalone se encuentran en `src/app/shared/ui/` y se importan directamente por archivo.
 
-| Componente        | API                                                                                             |
-| ----------------- | ----------------------------------------------------------------------------------------------- |
-| `Icon`            | `name: IconName`; SVG local y decorativo. El control padre aporta el nombre accesible.          |
-| `Breadcrumbs`     | Lee `data.breadcrumb` de las rutas y admite jerarquías futuras.                                 |
-| `PageHeader`      | `title` requerido; `description` e `icon` opcionales; slot `[page-header-actions]`.             |
-| `SeverityBadge`   | `severity: 'critical' \| 'high' \| 'medium' \| 'low'`; siempre incluye texto.                   |
-| `StatusIndicator` | `status: 'online' \| 'offline' \| 'investigating' \| 'resolved' \| 'active' \| 'inactive'`.     |
-| `EmptyState`      | `title`, `description`, `icon` opcional; slot `[empty-state-actions]`.                          |
-| `Skeleton`        | `variant: 'line' \| 'card'`, `label` accesible; placeholder estático, sin peticiones simuladas. |
-| `NotFound`        | Página lazy para la wildcard con enlace de vuelta al dashboard.                                 |
+| Componente        | API                                                                                                                              |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `Icon`            | `name: IconName`; SVG local y decorativo. El control padre aporta el nombre accesible.                                           |
+| `Breadcrumbs`     | Lee `data.breadcrumb` de las rutas y admite jerarquías futuras.                                                                  |
+| `PageHeader`      | `title` requerido; `description` e `icon` opcionales; slot `[page-header-actions]`.                                              |
+| `SeverityBadge`   | `severity: 'critical' \| 'high' \| 'medium' \| 'low'`; siempre incluye texto.                                                    |
+| `StatusIndicator` | Estados de dispositivos y amenazas: online, offline, isolated, inactive, open, investigating, resolved, false-positive y active. |
+| `EmptyState`      | `title`, `description`, `icon` opcional; slot `[empty-state-actions]`.                                                           |
+| `Skeleton`        | `variant: 'line' \| 'card'`, `label` accesible; placeholder estático, sin peticiones simuladas.                                  |
+| `NotFound`        | Página lazy para la wildcard con enlace de vuelta al dashboard.                                                                  |
 
-Las cinco páginas usan PageHeader y EmptyState. Los textos identifican explícitamente el contenido como preview; no representan datos operativos. SeverityBadge, StatusIndicator y Skeleton están disponibles para composición sin añadir ejemplos que parezcan funcionalidad real.
+Las páginas usan PageHeader y reutilizan EmptyState, SeverityBadge, StatusIndicator y Skeleton cuando corresponde. Dashboard, Threats y Devices muestran datos mock identificados como demo; Audit y Settings mantienen su preview sin datos operativos.
 
 Referencias: [Angular zoneless](https://angular.dev/guide/zoneless), [testing oficial](https://angular.dev/guide/testing) y [theming de Angular Material](https://github.com/angular/components/blob/main/guides/theming.md).
 
@@ -184,7 +184,7 @@ La fuente de verdad es `core/auth/permissions.ts`. Usar hasPermission para decis
 
 Las cinco rutas declaran `data.permission`. AuthGuard protege el shell y cada navegación hija; GuestGuard evita que una sesión autenticada vuelva a login; PermissionGuard redirige a `/forbidden` cuando falta el permiso. La sidebar filtra su fuente existente usando esos mismos permisos. Los permisos de investigate/manage quedan definidos sin implementar acciones del dominio.
 
-Return URL acepta `/dashboard`, `/threats`, `/threats/THR-00001` (ID de cinco dígitos), `/devices`, `/audit` y `/settings`, con query/fragment opcionales. Rechaza hosts externos, esquemas, backslashes, outlets y destinos no admitidos. Tras el login, los guards vuelven a comprobar el permiso del destino.
+Return URL acepta `/dashboard`, `/threats`, `/threats/THR-00001`, `/devices`, `/devices/DEV-00142` (IDs de cinco dígitos), `/audit` y `/settings`, con query/fragment opcionales. Rechaza hosts externos, esquemas, backslashes, outlets y destinos no admitidos. Tras el login, los guards vuelven a comprobar el permiso del destino.
 
 ### Interceptor preparado para REST
 
@@ -258,4 +258,31 @@ Loading utiliza Skeleton; errores de lista/detalle ofrecen Retry sin detalles in
 
 Verificación: probar búsqueda, cada filtro, chips, sort, tamaños de página y Next/Previous; recargar la primera URL del ejemplo y recorrer Back/Forward. Abrir un detalle directamente y un ID inexistente. Con Admin/Analyst iniciar investigación y confirmar/cancelar cierre; con Viewer comprobar solo lectura. Revisar listado, detalle y dialog a 375, 768, 1024 y 1440 px en light/dark. Los tests cubren repository, debounce, cancelación, stores, estados, query params, reglas, autorización y regresión de selects restaurados.
 
-Sprint 5 no está implementado: no hay acciones masivas, exportaciones, inventario de dispositivos, comentarios, asignaciones, auditoría global, WebSockets ni actualización automática.
+No hay acciones masivas, exportaciones, comentarios, asignaciones, auditoría global, WebSockets ni actualización automática.
+
+## Device Inventory — Sprint 5
+
+`features/devices` contiene modelos, repository, stores de lista y detalle, componentes de score/confirmación, reglas de postura y acciones, serialización de consulta y rutas lazy. Reutiliza SeverityBadge para la escala semántica de riesgo y StatusIndicator, ampliado con Isolated. Threats y Devices comparten estilos de listado acotados a `.record-list`; la clasificación del security score es una utilidad pura compartida con el dashboard.
+
+`DeviceRepository` ofrece `list(query)`, `getById(id)`, `updateProtectionStatus(id, status)` y `runMockScan(id)` mediante el token `DEVICE_REPOSITORY`. `MockDeviceRepository` genera **463 endpoints deterministas**, con 500 ms de latencia. Incluye laptops, workstations, servers, mobile y virtual machines, cinco familias de OS, departamentos, propietarios, estados, riesgo y cobertura de protección. Las versiones de OS y software son fixtures ficticios, no datos actuales del equipo del usuario. IPs y dominios de ejemplo pertenecen a rangos de documentación.
+
+La búsqueda cubre hostname, display name, owner, department e IP, con debounce de 300 ms. Los filtros de Status, Risk, Protection y OS family tienen chips eliminables y Clear all. El repository aplica filtros y sort antes de paginar; soporta hostname, risk, status, securityScore, lastSeenAt y lastScanAt. Risk descendente muestra Critical primero. Page sizes: 10, 25 por defecto y 50. Los cambios de búsqueda, filtros, ordenación o tamaño vuelven a página 1. El resumen representa **todo el conjunto que coincide con la consulta**, no solo la página visible: total, protected, at risk/unprotected, offline y critical risk.
+
+Query params: `search`, `status`, `risk`, `protection`, `os`, `page`, `pageSize`, `sort`, `direction`. Se restauran al recargar, copiar URL y navegar con Back/Forward. Valores inválidos se normalizan con reemplazo de URL; defaults válidos explícitos se conservan. Una página positiva sin registros ofrece First page. Los enlaces de detalle y Back to devices conservan los filtros.
+
+```text
+/devices?risk=high&status=online&os=windows&page=2
+/devices/DEV-00142
+```
+
+Stores con Signals/computed gestionan consulta, datos, summary, loading, error, postura y acciones. Cancelan solicitudes/temporizadores pendientes y descartan respuestas antiguas. Refresh conserva consulta y contenido mientras actualiza. El detalle carga por ID independientemente de la tabla y muestra información técnica, postura, hallazgos derivados, vulnerabilidades, software y actividad local. Desktop utiliza tabla semántica; tablet reduce columnas secundarias y móvil presenta tarjetas con la misma fuente de datos.
+
+La clasificación del score es Excellent (90–100), Good (75–89), Needs attention (50–74) y Critical (0–49), siempre con texto. Findings derivan de vulnerabilidades abiertas críticas, antigüedad del scan, versión del agente y cobertura de protección. Counts de vulnerabilidades/software se derivan de sus colecciones. Hay 0–8 vulnerabilidades y 8–12 aplicaciones por endpoint; la lista de software permite búsqueda local. Los identificadores `DEMO-CVE-*` son explícitamente ficticios y no representan CVEs reales. Las vulnerabilidades se ordenan por CVSS descendente; scan no simula remediación.
+
+Solo **Admin**, con `devices:manage`, puede ejecutar Run security scan, Isolate device y Restore device. Analyst y Viewer tienen acceso de lectura. UI, store y repository comprueban permiso; el repository lo vuelve a comprobar al completar la operación. Scan está disponible para Online/Isolated, actualiza lastScanAt y registra actividad mock. Isolate está disponible para estados distintos de Isolated; Restore solo para Isolated y lo devuelve a Online. Las reglas están centralizadas. `updateProtectionStatus` representa el cambio de contención (status), conservando la cobertura del agente (`protectionStatus`): aislar no implica desinstalar protección.
+
+Isolate y Restore requieren Material Dialog, foco inicial en Cancel y restauración al cancelar. Las acciones bloquean doble envío y muestran loading, error local o Snackbar de éxito; después de mutar, el foco va a la región de acciones. Los cambios son **locales/mock**, persisten al navegar durante la misma ejecución y se reinician al recargar. No hay integración EDR/backend, scan real, aislamiento real, remote shell ni remediación.
+
+Loading utiliza Skeleton. Lista y detalle ofrecen mensajes de error con Retry; EmptyState distingue No devices enrolled de No devices match your filters. Un ID desconocido muestra Device not found, sin redirección silenciosa. Para tests internos se puede sustituir `DEVICE_REPOSITORY` o configurar `DEVICE_MOCK_CONFIG` con `{ latency: 0, scenario: 'error' }` / `scenario: 'empty'`, sin controles de desarrollo visibles.
+
+Verificación: buscar, combinar filtros, ordenar, cambiar página/tamaño; recargar el ejemplo de URL y recorrer Back/Forward. Abrir `/devices/DEV-00142` directamente y `/devices/DEV-99999` para not found. Con Admin ejecutar scan y confirmar/cancelar Isolate/Restore; con Analyst/Viewer comprobar solo lectura. Revisar inventario, postura, vulnerabilidades, software y dialogs a 375, 768, 1024 y 1440 px en light/dark. Los tests cubren repository, stores, debounce, concurrencia, URL, detalle, clasificación, findings y permisos. Sprint 6 no está implementado.

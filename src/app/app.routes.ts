@@ -34,7 +34,8 @@ export const routes: Routes = [
         path: 'devices',
         data: { breadcrumb: 'Devices', permission: PERMISSIONS.DEVICES_VIEW },
         title: 'Devices | Sentinel',
-        loadComponent: () => import('./features/devices/devices').then((m) => m.Devices),
+        loadChildren: () =>
+          import('./features/devices/devices.routes').then((m) => m.DEVICE_ROUTES),
       },
       {
         path: 'audit',

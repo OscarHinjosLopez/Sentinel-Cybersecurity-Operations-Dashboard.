@@ -15,6 +15,7 @@ import { PageHeader } from '../../shared/ui/page-header/page-header';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 @Component({
   selector: 'app-threats',
+  host: { class: 'record-list' },
   imports: [
     FormsModule,
     PageHeader,
