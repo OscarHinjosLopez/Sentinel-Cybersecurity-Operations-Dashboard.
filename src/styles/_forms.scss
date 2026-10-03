@@ -1,0 +1,51 @@
+@use './typography' as type;
+.sentinel-field {
+  margin-bottom: var(--sentinel-space-8);
+}
+.sentinel-field label {
+  display: block;
+  margin-bottom: var(--sentinel-space-8);
+  @include type.text(body-small);
+  font-weight: var(--sentinel-weight-medium);
+}
+.sentinel-field input {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--sentinel-space-48);
+  padding: var(--sentinel-space-12) var(--sentinel-space-16);
+  border: 1px solid var(--sentinel-border-strong);
+  border-radius: var(--sentinel-radius-md);
+  background: var(--sentinel-surface);
+  color: var(--sentinel-text-primary);
+  font: inherit;
+}
+.sentinel-field input:hover {
+  border-color: var(--sentinel-text-primary);
+}
+.sentinel-field input:focus-visible {
+  border-color: var(--sentinel-primary);
+}
+.sentinel-field input[aria-invalid='true'] {
+  border-color: var(--sentinel-danger);
+}
+.sentinel-field input[readonly] {
+  cursor: wait;
+}
+.sentinel-field .field-error {
+  min-height: var(--sentinel-space-24);
+  padding-top: var(--sentinel-space-4);
+  color: var(--sentinel-danger);
+  @include type.text(caption);
+}
+.sentinel-field .password-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.sentinel-field .password-control input {
+  padding-inline-end: var(--sentinel-space-48);
+}
+.sentinel-field .password-control button {
+  position: absolute;
+  inset-inline-end: var(--sentinel-space-4);
+}

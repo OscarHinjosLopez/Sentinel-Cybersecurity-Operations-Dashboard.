@@ -7,7 +7,7 @@
     [mode]="mobile() ? 'over' : 'side'"
     [opened]="!mobile() || drawerOpen()"
     [autoFocus]="mobile()"
-    (openedChange)="drawerOpen.set(mobile() && $event)"
+    (closedStart)="drawerOpen.set(false)"
   >
     <app-sidebar [mobile]="mobile()" (closeRequested)="drawerOpen.set(false)" />
   </mat-sidenav>

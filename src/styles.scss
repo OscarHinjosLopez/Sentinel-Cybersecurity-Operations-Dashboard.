@@ -1,6 +1,7 @@
 @use './styles/tokens';
 @use './styles/theme';
 @use './styles/typography' as type;
+@use './styles/forms';
 *,
 *::before,
 *::after {

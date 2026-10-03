@@ -1,5 +1,8 @@
 import { Component, computed, input } from '@angular/core';
 const paths = {
+  eye: 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+  eyeOff:
+    'm3 3 18 18 M10 5h2c7 0 10 7 10 7s-1 3-4 5 M6 6c-3 2-4 6-4 6s3 7 10 7c2 0 3 0 5-2 M10 10l4 4',
   shield: 'M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z M8 12l3 3 5-6',
   dashboard: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
   threats: 'm12 3 10 18H2L12 3Z M12 9v5 M12 17h.01',

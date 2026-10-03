@@ -34,11 +34,14 @@
     <button
       class="user-button"
       matButton
-      aria-label="Security Analyst, profile preview"
+      [attr.aria-label]="auth.currentUser()?.name + ', user menu'"
       [matMenuTriggerFor]="userMenu"
     >
-      <span class="avatar" aria-hidden="true">OS</span
-      ><span class="user-label">Security Analyst</span><app-icon name="chevron" />
+      <span class="avatar" aria-hidden="true">{{ initials() }}</span
+      ><span class="user-label"
+        ><span>{{ auth.currentUser()?.name }}</span
+        ><small>{{ roleLabel() }}</small></span
+      ><app-icon name="chevron" />
     </button>
   </div>
 </header>
@@ -51,8 +54,9 @@
 >
 <mat-menu #userMenu="matMenu"
   ><div class="menu-preview">
-    <strong>Security Analyst</strong>
-    <p>Profile preview. No account connected.</p>
+    <strong>{{ auth.currentUser()?.name }}</strong>
+    <p>{{ roleLabel() }}</p>
   </div>
-  <button mat-menu-item disabled>Profile unavailable in this preview</button></mat-menu
+  <button mat-menu-item disabled>Profile</button
+  ><button mat-menu-item (click)="auth.logout()">Sign out</button></mat-menu
 >

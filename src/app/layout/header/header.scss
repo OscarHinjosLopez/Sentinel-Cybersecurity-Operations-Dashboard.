@@ -77,3 +77,21 @@ header {
     display: none;
   }
 }
+
+.user-label {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  vertical-align: middle;
+  line-height: var(--sentinel-line-heading);
+}
+.user-label small {
+  font-size: var(--sentinel-font-caption);
+  color: var(--sentinel-text-muted);
+  margin-top: var(--sentinel-space-4);
+}
+@media (max-width: 767px) {
+  .user-label {
+    display: none;
+  }
+}

@@ -1,3 +1,7 @@
+import { AuthService } from '../../core/auth/auth.service';
+import { AUTH_API } from '../../core/auth/data-access/auth-api';
+import { MockAuthApi, MOCK_AUTH_LATENCY } from '../../core/auth/data-access/mock-auth-api';
+import { SESSION_STORAGE_KEY } from '../../core/auth/session-storage';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -8,19 +12,27 @@ import { routes } from '../../app.routes';
 import { Shell } from './shell';
 describe('Responsive shell', () => {
   let viewport: BehaviorSubject<BreakpointState>;
-  beforeEach(() => {
+  beforeEach(async () => {
+    sessionStorage.removeItem(SESSION_STORAGE_KEY);
     viewport = new BehaviorSubject<BreakpointState>({ matches: true, breakpoints: {} });
     TestBed.configureTestingModule({
       imports: [App],
       providers: [
         provideRouter(routes),
+        { provide: AUTH_API, useExisting: MockAuthApi },
+        { provide: MOCK_AUTH_LATENCY, useValue: 0 },
         {
           provide: BreakpointObserver,
           useValue: { observe: () => viewport, isMatched: () => viewport.value.matches },
         },
       ],
     });
+    await TestBed.inject(AuthService).login({
+      email: 'admin@sentinel.dev',
+      password: 'Sentinel123!',
+    });
   });
+  afterEach(() => sessionStorage.removeItem(SESSION_STORAGE_KEY));
   it('opens mobile navigation and closes it after route navigation', async () => {
     const fixture = TestBed.createComponent(App);
     const router = TestBed.inject(Router);
@@ -61,7 +73,8 @@ describe('Responsive shell', () => {
     await fixture.whenStable();
     const element = fixture.nativeElement as HTMLElement;
     const main = element.querySelector<HTMLElement>('main');
-    const focus = vi.spyOn(main!, 'focus');
+    if (!main) throw new Error('Main landmark missing');
+    const focus = vi.spyOn(main, 'focus');
     const event = new MouseEvent('click', { bubbles: true, cancelable: true });
     element.querySelector('.skip-link')?.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
