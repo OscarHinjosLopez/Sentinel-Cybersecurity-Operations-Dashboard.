@@ -6,9 +6,15 @@ import { NavigationEnd, NavigationSkipped, Router, RouterOutlet } from '@angular
 import { filter } from 'rxjs';
 import { Header } from '../header/header';
 import { Sidebar } from '../sidebar/sidebar';
+import { NotificationStore } from '../../core/notifications/notification.store';
+import { CommandRegistry } from '../../core/commands/command-registry';
+import { UxDialogService } from '../../core/commands/ux-dialog.service';
+import { KeyboardShortcutsService } from '../../core/commands/keyboard-shortcuts.service';
+import { UserPreferencesService } from '../../core/preferences/user-preferences.service';
 @Component({
   selector: 'app-shell',
   imports: [Header, Sidebar, RouterOutlet, MatSidenavModule],
+  providers: [NotificationStore, CommandRegistry, UxDialogService, KeyboardShortcutsService],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })
@@ -24,6 +30,8 @@ export class Shell {
     content.focus();
   }
   constructor() {
+    inject(UserPreferencesService);
+    inject(KeyboardShortcutsService);
     effect(() => {
       if (!this.mobile()) this.drawerOpen.set(false);
     });

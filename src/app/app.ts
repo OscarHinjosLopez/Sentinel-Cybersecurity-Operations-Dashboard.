@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { filter, throttleTime } from 'rxjs';
 import { RealtimeService } from './core/realtime/realtime.service';
 import { RouterOutlet } from '@angular/router';
+import { notificationFromEvent } from './core/notifications/notification-rules';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
@@ -16,10 +17,7 @@ export class App {
     const snack = inject(MatSnackBar);
     realtime?.events$
       .pipe(
-        filter(
-          (event) =>
-            event.type === 'threat.created' && event.payload.threat.severity === 'critical',
-        ),
+        filter((event) => notificationFromEvent(event)?.priority === 'critical'),
         throttleTime(10000),
         takeUntilDestroyed(),
       )

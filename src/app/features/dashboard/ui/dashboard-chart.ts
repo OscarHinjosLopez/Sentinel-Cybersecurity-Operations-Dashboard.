@@ -23,6 +23,7 @@ import { SVGRenderer } from 'echarts/renderers';
 import type { EChartsOption } from 'echarts';
 import { ThemeService } from '../../../core/services/theme.service';
 import { DashboardSummary } from '../models/dashboard.models';
+import { UserPreferencesService } from '../../../core/preferences/user-preferences.service';
 use([
   LineChart,
   PieChart,
@@ -44,6 +45,7 @@ export class DashboardChart implements OnDestroy {
   readonly description = input.required<string>();
   private readonly container = viewChild.required<ElementRef<HTMLDivElement>>('container');
   private readonly theme = inject(ThemeService);
+  private readonly preferences = inject(UserPreferencesService);
   private readonly document = inject(DOCUMENT);
   private chart?: EChartsType;
   private readonly dataset = computed(() =>
@@ -67,6 +69,7 @@ export class DashboardChart implements OnDestroy {
       this.range();
       this.kind();
       this.theme.mode();
+      this.preferences.reducedMotion();
       untracked(() => this.render());
     });
   }
@@ -87,7 +90,7 @@ export class DashboardChart implements OnDestroy {
     probe.remove();
     const data = this.summary();
     const option: EChartsOption = {
-      animation: !this.document.defaultView?.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      animation: !this.preferences.reducedMotion(),
       textStyle: { color: text, fontFamily: 'Segoe UI, Arial, sans-serif' },
       tooltip: {
         trigger: this.kind() === 'activity' ? 'axis' : 'item',

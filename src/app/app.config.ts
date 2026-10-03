@@ -15,23 +15,22 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { RealtimeService } from './core/realtime/realtime.service';
 import { MockRealtimeTransport } from './core/realtime/mock-realtime.transport';
 import { REALTIME_TRANSPORT } from './core/realtime/realtime.transport';
-import { MockDashboardRepository } from './features/dashboard/data-access/dashboard.repository';
 export const appConfig: ApplicationConfig = {
   providers: [
     RealtimeService,
     MockRealtimeTransport,
     { provide: REALTIME_TRANSPORT, useExisting: MockRealtimeTransport },
-    provideAppInitializer(() => {
-      inject(MockDashboardRepository);
-    }),
     provideAppInitializer(async () => {
       const injector = inject(EnvironmentInjector);
-      const [{ MockThreatRepository }, { MockDeviceRepository }] = await Promise.all([
-        import('./features/threats/data-access/threat.repository'),
-        import('./features/devices/data-access/device.repository'),
-      ]);
+      const [{ MockThreatRepository }, { MockDeviceRepository }, { MockDashboardRepository }] =
+        await Promise.all([
+          import('./features/threats/data-access/threat.repository'),
+          import('./features/devices/data-access/device.repository'),
+          import('./features/dashboard/data-access/dashboard.repository'),
+        ]);
       injector.get(MockThreatRepository);
       injector.get(MockDeviceRepository);
+      injector.get(MockDashboardRepository);
     }),
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),

@@ -9,6 +9,7 @@
   </div></app-page-header
 >
 <p class="demo-note">Demo inventory · All device actions are local simulations.</p>
+<app-quick-actions [commands]="['at-risk-devices']" />
 @if (store.summary(); as summary) {
   <dl class="inventory-summary" aria-label="Inventory summary for matching devices">
     <div>

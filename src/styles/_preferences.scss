@@ -1,0 +1,34 @@
+html[data-density='compact'] .record-list th,
+html[data-density='compact'] .record-list td {
+  padding-block: 0.5rem;
+}
+html[data-density='compact'] .record-list .filter-panel {
+  gap: 0.75rem;
+  padding: 1rem;
+}
+html[data-density='compact'] .record-list .mobile-list li {
+  padding: 0.75rem;
+}
+html[data-density='compact'] app-dashboard .panel,
+html[data-density='compact'] app-kpi-card article {
+  padding: 1rem;
+}
+html[data-density='compact'] app-dashboard .events li {
+  padding-block: 0.5rem;
+}
+html[data-density='compact'] app-notification-center li {
+  padding-block: 0.5rem;
+}
+html[data-reduced-motion='true'] *,
+html[data-reduced-motion='true'] *::before,
+html[data-reduced-motion='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+@media (max-width: 767px) {
+  .notification-dialog .mat-mdc-dialog-surface {
+    border-radius: var(--sentinel-radius-lg);
+  }
+}

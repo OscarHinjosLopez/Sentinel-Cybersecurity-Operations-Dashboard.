@@ -64,6 +64,9 @@ header {
   margin-top: var(--sentinel-space-8);
 }
 @media (max-width: 767px) {
+  .desktop-control {
+    display: none;
+  }
   header {
     padding-inline: var(--sentinel-space-12);
     gap: var(--sentinel-space-4);

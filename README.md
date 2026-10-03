@@ -1,6 +1,6 @@
-# Sentinel — Cybersecurity Operations Dashboard
+﻿# Sentinel — Cybersecurity Operations Dashboard
 
-Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye los Sprints **0 — Foundation**, **1 — Design System + Application Shell**, **2 — Authentication + RBAC**, **3 — SOC Dashboard**, **4 — Threat Management**, **5 — Device Inventory** y **6 — Real-time + WebSockets**. Dashboard, amenazas y dispositivos utilizan datos ficticios y un stream simulado; Audit y Settings siguen siendo placeholders.
+Frontend para una aplicación empresarial de operaciones de ciberseguridad (SOC). Incluye los Sprints **0 — Foundation**, **1 — Design System + Application Shell**, **2 — Authentication + RBAC**, **3 — SOC Dashboard**, **4 — Threat Management**, **5 — Device Inventory**, **6 — Real-time + WebSockets** y **7 — Advanced UX**. Dashboard, amenazas y dispositivos utilizan datos ficticios y un stream simulado; Audit conserva su placeholder; Settings permite configurar preferencias frontend.
 
 ## Stack
 
@@ -140,7 +140,7 @@ Los componentes standalone se encuentran en `src/app/shared/ui/` y se importan d
 | `Skeleton`        | `variant: 'line' \| 'card'`, `label` accesible; placeholder estático, sin peticiones simuladas.                                  |
 | `NotFound`        | Página lazy para la wildcard con enlace de vuelta al dashboard.                                                                  |
 
-Las páginas usan PageHeader y reutilizan EmptyState, SeverityBadge, StatusIndicator y Skeleton cuando corresponde. Dashboard, Threats y Devices muestran datos mock identificados como demo; Audit y Settings mantienen su preview sin datos operativos.
+Las páginas usan PageHeader y reutilizan EmptyState, SeverityBadge, StatusIndicator y Skeleton cuando corresponde. Dashboard, Threats y Devices muestran datos mock identificados como demo; Audit mantiene su preview y Settings configura preferencias locales.
 
 Referencias: [Angular zoneless](https://angular.dev/guide/zoneless), [testing oficial](https://angular.dev/guide/testing) y [theming de Angular Material](https://github.com/angular/components/blob/main/guides/theming.md).
 
@@ -327,4 +327,41 @@ Para sustituir el mock, implementar `WebSocketRealtimeTransport` con la misma in
 
 Tests: se mantienen los 240 anteriores y se añaden 57 (297 total). Cubren transporte y destrucción, los cinco eventos/invalid payloads, backoff y máximo, logout/relogin/restauración reales, deduplicación/orden/memoria, proyecciones KPI/feed, refresh concurrente, filtros/sort/paginación, detalle/mutaciones anteriores, coherencia de dispositivos y avisos críticos accesibles.
 
-Verificación manual: arrancar con `npm start`, iniciar sesión y observar Live en `/dashboard`; esperar detecciones y snackbar Critical. En `/threats?severity=critical` solo entran altas compatibles. Abrir un detalle y emitir internamente un update del mismo ID; debe cambiar sin reload. `simulateDrop` muestra Reconnecting y mantiene datos hasta recuperar conexión. Repetir un `emitForTesting` con el mismo ID solo aplica una vez. Logout durante retry cancela la reconexión; login y recarga con sesión restaurada conectan una vez. Revisar las tres rutas y header a 375, 768, 1024 y 1440 px, light/dark, foco/tooltip, reduced motion y consola. **Sprint 7 no está implementado.**
+Verificación manual: arrancar con `npm start`, iniciar sesión y observar Live en `/dashboard`; esperar detecciones y snackbar Critical. En `/threats?severity=critical` solo entran altas compatibles. Abrir un detalle y emitir internamente un update del mismo ID; debe cambiar sin reload. `simulateDrop` muestra Reconnecting y mantiene datos hasta recuperar conexión. Repetir un `emitForTesting` con el mismo ID solo aplica una vez. Logout durante retry cancela la reconexión; login y recarga con sesión restaurada conectan una vez. Revisar las tres rutas y header a 375, 768, 1024 y 1440 px, light/dark, foco/tooltip, reduced motion y consola. **Sprint 7 está implementado; Sprint 8 no está iniciado.**
+
+## Advanced UX — Sprint 7
+
+Notification Center, Command Palette y shortcuts se activan en el shell autenticado. Los diálogos se cargan bajo demanda con Material/CDK, sin nuevas dependencias. El header mantiene navegación, estado realtime, búsqueda de comandos y campana; en móvil Theme y Keyboard shortcuts siguen disponibles en el menú del usuario.
+
+### Notification Center
+
+Dominio tipado: Notification, NotificationId, NotificationType (threat/device/system/security), NotificationPriority (critical/high/normal/low) y acciones discriminadas View threat/View device. NotificationStore usa Signals y computed para unreadCount/hasUnread. Conserva las 100 notificaciones más recientes, ordenadas por fecha e ID; permite lectura individual, Mark all as read, eliminar y Clear read, que conserva las no leídas. El historial es de sesión, se vacía al salir y no se guarda en localStorage.
+
+Una integración central consume los eventos ya validados y deduplicados de RealtimeService. Genera entradas para altas Critical/High, cambios a Offline/Isolated y cambios del security score; ignora altas de menor severidad, updates y resoluciones. Las reglas están en notification-rules.ts. La deduplicación adicional retiene hasta 1000 IDs; una reconexión no duplica eventos recientes. El snackbar Critical sigue ofreciendo feedback temporal y comparte el criterio de prioridad con estas reglas. Desactivar Realtime notifications solo evita nuevas entradas del centro: conserva el stream, los datos live y el feedback inmediato.
+
+La campana muestra el número de no leídas con nombre accesible. El panel admite teclado, Escape, foco inicial/restaurado y navegación a la entidad. Cada entrada muestra tipo, prioridad, lectura y tiempo relativo, con fecha absoluta disponible. No anuncia automáticamente cada entrada; el estado vacío muestra “You're all caught up”.
+
+### Command Palette y shortcuts
+
+Ctrl/Cmd + K abre la paleta global, incluso desde un input. Busca por label, description, keywords y category. Arrow Down/Up seleccionan, Enter ejecuta, Tab recorre controles y Escape cierra. Material/CDK proporciona semántica de diálogo, focus trap y restauración de foco.
+
+CommandRegistry centraliza once comandos con acciones tipadas y permisos verificados al mostrar y ejecutar: Dashboard, Threats, Devices, Audit, Settings, Toggle theme, Open notifications, Keyboard shortcuts, Open critical threats, Show at-risk devices y Clear threat filters. Admin dispone de Audit/Settings; Analyst solo Audit; Viewer ninguno de los dos. Settings conserva su acceso Admin del RBAC existente.
+
+| Atajo        | Acción                  |
+| ------------ | ----------------------- |
+| Ctrl/Cmd + K | Command Palette         |
+| G → D        | Dashboard               |
+| G → T        | Threats                 |
+| G → V        | Devices                 |
+| ?            | Keyboard shortcuts help |
+| Escape       | Cerrar diálogo          |
+
+Las secuencias G caducan después de un segundo. Los atajos de letras y ? se ignoran en input, textarea, select, contenteditable y diálogos; tampoco interceptan composición IME o repetición. Help también está en la paleta y el menú del usuario. Quick actions reutiliza CommandRegistry: Dashboard enlaza Threats/Devices; Threats ofrece Critical/Clear filters; Devices filtra At risk.
+
+### User preferences y persistencia
+
+/settings ofrece Theme (ThemeService existente), Compact mode, Reduced motion (System/Reduce/Full), Default page size (10/25/50) y Realtime notifications. Las preferencias son locales a este navegador, compartidas entre cuentas y se guardan automáticamente. Compact reduce espaciado de tablas, tarjetas y listas sin reducir los controles. System respeta prefers-reduced-motion; Full es una elección explícita para activar movimiento. Las gráficas reutilizan esta preferencia.
+
+UserPreferencesService valida la estructura versionada de sentinel.preferences (version: 1). Datos corruptos/incompatibles vuelven a defaults; storage bloqueado conserva los cambios en memoria durante la sesión. No persiste tokens, sesión ni notificaciones. ThemeService mantiene su clave existente sentinel-theme. El tamaño predeterminado se aplica a Threats/Devices cuando no hay pageSize válido en la URL; un pageSize explícito, incluido 25, prevalece.
+
+Tests del sprint cubren stores, reglas realtime/deduplicación, permisos, búsquedas, teclado, diálogos, persistencia corrupta/bloqueada y tamaño de página. Se conservan los 297 tests anteriores. La revisión manual incluye las tres cuentas, light/dark y 375/768/1024/1440 px. No se incorporan backend, push/browser notifications, exports, saved searches ni funcionalidades del Sprint 8.

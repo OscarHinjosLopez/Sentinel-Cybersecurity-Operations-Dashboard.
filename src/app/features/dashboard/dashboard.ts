@@ -12,9 +12,11 @@ import { DashboardChart } from './ui/dashboard-chart';
 import { KpiCard } from './ui/kpi-card';
 import { ThreatOrigins } from './ui/threat-origins';
 import { RealtimeStatus } from '../../shared/ui/realtime-status/realtime-status';
+import { QuickActions } from '../../shared/ui/quick-actions/quick-actions';
 @Component({
   selector: 'app-dashboard',
   imports: [
+    QuickActions,
     RealtimeStatus,
     PageHeader,
     EmptyState,

@@ -1,5 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 const paths = {
+  bell: 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9 M10 21h4',
+  search: 'M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16 M17 17l5 5',
   eye: 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
   eyeOff:
     'm3 3 18 18 M10 5h2c7 0 10 7 10 7s-1 3-4 5 M6 6c-3 2-4 6-4 6s3 7 10 7c2 0 3 0 5-2 M10 10l4 4',

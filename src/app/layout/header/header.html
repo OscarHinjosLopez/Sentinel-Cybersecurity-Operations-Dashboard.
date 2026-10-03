@@ -17,6 +17,31 @@
     <app-realtime-status [compact]="mobile()" />
     <button
       matIconButton
+      aria-label="Open command palette"
+      aria-keyshortcuts="Control+k Meta+k"
+      matTooltip="Search commands (Ctrl / Cmd + K)"
+      (click)="dialogs?.openPalette()"
+    >
+      <app-icon name="search" />
+    </button>
+    <button
+      matIconButton
+      [attr.aria-label]="'Notifications, ' + (notifications?.unreadCount() ?? 0) + ' unread'"
+      [attr.aria-expanded]="notifications?.isOpen() ?? false"
+      aria-haspopup="dialog"
+      matTooltip="Notifications"
+      (click)="notifications?.toggle()"
+    >
+      <app-icon
+        name="bell"
+        [matBadge]="notifications?.unreadCount() ?? 0"
+        [matBadgeHidden]="!notifications?.hasUnread()"
+        matBadgeSize="medium"
+      />
+    </button>
+    <button
+      class="desktop-control"
+      matIconButton
       [attr.aria-label]="theme.mode() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
       [matTooltip]="theme.mode() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
       (click)="theme.toggle()"
@@ -24,10 +49,11 @@
       <app-icon [name]="theme.mode() === 'dark' ? 'sun' : 'moon'" />
     </button>
     <button
+      class="desktop-control"
       matIconButton
-      aria-label="Help, preview"
-      matTooltip="Help"
-      [matMenuTriggerFor]="helpMenu"
+      aria-label="Keyboard shortcuts"
+      matTooltip="Keyboard shortcuts (?)"
+      (click)="dialogs?.openHelp()"
     >
       <app-icon name="help" />
     </button>
@@ -46,18 +72,15 @@
     </button>
   </div>
 </header>
-<mat-menu #helpMenu="matMenu"
-  ><div class="menu-preview">
-    <strong>Sentinel help</strong>
-    <p>Help resources will be available in a future release.</p>
-  </div>
-  <button mat-menu-item disabled>Documentation coming soon</button></mat-menu
->
 <mat-menu #userMenu="matMenu"
   ><div class="menu-preview">
     <strong>{{ auth.currentUser()?.name }}</strong>
     <p>{{ roleLabel() }}</p>
   </div>
+  <button mat-menu-item (click)="theme.toggle()">
+    {{ theme.mode() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme' }}
+  </button>
+  <button mat-menu-item (click)="dialogs?.openHelp()">Keyboard shortcuts</button>
   <button mat-menu-item disabled>Profile</button
   ><button mat-menu-item (click)="auth.logout()">Sign out</button></mat-menu
 >
