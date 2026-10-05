@@ -81,6 +81,20 @@ describe('Responsive shell', () => {
     expect(focus).toHaveBeenCalledOnce();
     expect(router.url).toBe('/devices');
   });
+  it('focuses the destination landmark after path changes but preserves focus during query updates', async () => {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/threats');
+    await fixture.whenStable();
+    const main = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('main')!;
+    const focus = vi.spyOn(main, 'focus');
+    await router.navigateByUrl('/threats?severity=critical');
+    await fixture.whenStable();
+    expect(focus).not.toHaveBeenCalled();
+    await router.navigateByUrl('/devices');
+    await fixture.whenStable();
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+  });
   it('keeps a single navigation instance and resets drawer state on desktop', async () => {
     const fixture = TestBed.createComponent(App);
     await TestBed.inject(Router).navigateByUrl('/dashboard');

@@ -1,0 +1,11 @@
+{
+  "viewport": "1440x900",
+  "entry": "src/main.ts (production)",
+  "screenshots": 8,
+  "login": "PASS",
+  "dashboard": "PASS",
+  "deepRouteReload": "PASS",
+  "spaFallback": "PASS",
+  "missingAsset": 404,
+  "browserErrors": []
+}

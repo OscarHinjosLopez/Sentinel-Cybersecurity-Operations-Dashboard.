@@ -36,6 +36,7 @@ yarn-error.log
 /coverage
 /playwright-report
 /test-results
+/performance-reports
 /libpeerconnection.log
 testem.log
 /typings
@@ -44,3 +45,15 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local environment and hosting state
+.env
+.env.*
+!.env.example
+.vercel/
+*.tsbuildinfo
+*.log
+*.tmp
+*.swp
+/lighthouse-*.html
+/lighthouse-*.json

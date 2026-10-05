@@ -129,7 +129,8 @@
     overflow-wrap: anywhere;
   }
   .refreshing {
-    opacity: 0.65;
+    // Dimming the whole table also dims muted labels and breaks their contrast.
+    cursor: progress;
   }
   .state {
     text-align: center;

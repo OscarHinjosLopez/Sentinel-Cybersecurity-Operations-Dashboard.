@@ -32,3 +32,9 @@ html[data-reduced-motion='true'] *::after {
     border-radius: var(--sentinel-radius-lg);
   }
 }
+// Keep dialog content readable at browser zoom and on short landscape viewports.
+@media (max-height: 480px) {
+  :root {
+    --sentinel-notification-offset: 0.75rem;
+  }
+}

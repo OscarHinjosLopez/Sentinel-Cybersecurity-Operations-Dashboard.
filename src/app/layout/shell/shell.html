@@ -8,6 +8,7 @@
     [opened]="!mobile() || drawerOpen()"
     [autoFocus]="mobile()"
     (closedStart)="drawerOpen.set(false)"
+    (closed)="restoreRouteFocus()"
   >
     <app-sidebar [mobile]="mobile()" (closeRequested)="drawerOpen.set(false)" />
   </mat-sidenav>
