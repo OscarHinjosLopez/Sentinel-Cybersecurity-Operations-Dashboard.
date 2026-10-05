@@ -74,6 +74,16 @@ h2 {
   text-align: right;
   color: var(--sentinel-text-muted);
 }
+.chart-placeholder {
+  height: 19rem;
+  min-width: 0;
+}
+.chart-error {
+  display: grid;
+  align-content: center;
+  padding: 1rem;
+  color: var(--sentinel-text-secondary);
+}
 details {
   border-top: 1px solid var(--sentinel-border);
   padding-top: 0.75rem;

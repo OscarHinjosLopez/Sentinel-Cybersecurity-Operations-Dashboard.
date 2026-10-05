@@ -100,9 +100,15 @@ export class DashboardChart implements OnDestroy {
         textStyle: { color: text },
         confine: true,
       },
-      aria: { enabled: true, decal: { show: true } },
+      aria: { enabled: true, label: { description: this.description() }, decal: { show: true } },
     };
-    if (this.kind() === 'activity')
+    if (this.kind() === 'activity') {
+      const formatter = new Intl.DateTimeFormat(
+        'en',
+        data.range === '24h'
+          ? { hour: '2-digit', hour12: false }
+          : { month: 'short', day: 'numeric' },
+      );
       Object.assign(option, {
         color: [primary, success],
         legend: { bottom: 0, textStyle: { color: text }, selectedMode: false },
@@ -110,14 +116,7 @@ export class DashboardChart implements OnDestroy {
         xAxis: {
           type: 'category',
           boundaryGap: false,
-          data: data.activity.map((point) =>
-            new Intl.DateTimeFormat(
-              'en',
-              data.range === '24h'
-                ? { hour: '2-digit', hour12: false }
-                : { month: 'short', day: 'numeric' },
-            ).format(new Date(point.timestamp)),
-          ),
+          data: data.activity.map((point) => formatter.format(new Date(point.timestamp))),
           axisLine: { lineStyle: { color: border } },
           axisLabel: { color: text, hideOverlap: true },
           axisTick: { show: false },
@@ -146,7 +145,7 @@ export class DashboardChart implements OnDestroy {
           },
         ],
       });
-    else if (this.kind() === 'severity')
+    } else if (this.kind() === 'severity')
       Object.assign(option, {
         color: colors,
         series: [

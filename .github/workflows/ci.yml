@@ -26,7 +26,7 @@ jobs:
       - run: npm ci
       - run: npm run format:check
       - run: npm run lint
-      - run: npm run e2e:typecheck
+      - run: npm run typecheck
       - run: npm test -- --run
       - run: npm run test:coverage
       - run: npm run build
@@ -38,6 +38,31 @@ jobs:
           path: coverage/sentinel
           if-no-files-found: ignore
           retention-days: 7
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: docker build -t sentinel:ci .
+      - name: Static server and SPA fallback
+        shell: bash
+        run: |
+          docker run -d --name sentinel-ci -p 8080:80 sentinel:ci
+          trap 'docker logs sentinel-ci; docker rm -f sentinel-ci' EXIT
+          curl --fail --retry 10 --retry-delay 1 --retry-connrefused http://localhost:8080/index.html -o /tmp/sentinel-index.html
+          for route in / /login /dashboard /threats /threats/THR-00042 /devices/DEV-00142 /settings; do
+            curl --fail "http://localhost:8080$route" -o /tmp/sentinel-route.html
+            cmp /tmp/sentinel-index.html /tmp/sentinel-route.html
+          done
+          curl --fail -I http://localhost:8080/index.html | tee /tmp/sentinel-headers
+          grep -qi 'X-Content-Type-Options: nosniff' /tmp/sentinel-headers
+          grep -qi 'Cache-Control: no-cache' /tmp/sentinel-headers
+          asset=$(docker exec sentinel-ci sh -c 'basename /usr/share/nginx/html/main-*.js')
+          curl --fail -I "http://localhost:8080/$asset" | grep -qi 'immutable'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/missing.js)" = 404
 
   e2e:
     runs-on: ubuntu-latest

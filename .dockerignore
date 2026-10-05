@@ -1,0 +1,16 @@
+node_modules
+dist
+coverage
+playwright-report
+test-results
+.angular
+.git
+.github
+.vscode
+.vercel
+.env*
+docs
+e2e
+performance-reports
+tmp
+*.log

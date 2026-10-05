@@ -71,11 +71,21 @@
           </div>
           <span class="stat">{{ store.detectedTotal() | number }} <small>detected</small></span>
         </div>
-        <app-dashboard-chart
-          kind="activity"
-          [summary]="data"
-          description="Threat activity: solid line shows detected threats; dashed line shows blocked threats. Expand the data below for exact values."
-        />
+        @defer (on viewport) {
+          <app-dashboard-chart
+            kind="activity"
+            [summary]="data"
+            description="Threat activity: solid line shows detected threats; dashed line shows blocked threats. Expand the data below for exact values."
+          />
+        } @placeholder {
+          <div class="chart-placeholder" aria-hidden="true"><app-skeleton variant="card" /></div>
+        } @loading {
+          <div class="chart-placeholder" role="status">Loading activity chart…</div>
+        } @error {
+          <div class="chart-placeholder chart-error">
+            Chart unavailable. Exact values remain available in the activity data below.
+          </div>
+        }
         <details>
           <summary>View activity data</summary>
           <div class="data-list">
@@ -95,11 +105,21 @@
             <p>All detections in the selected period</p>
           </div>
         </div>
-        <app-dashboard-chart
-          kind="severity"
-          [summary]="data"
-          description="Threat distribution by severity. Counts and percentages are listed below."
-        />
+        @defer (on viewport) {
+          <app-dashboard-chart
+            kind="severity"
+            [summary]="data"
+            description="Threat distribution by severity. Counts and percentages are listed below."
+          />
+        } @placeholder {
+          <div class="chart-placeholder" aria-hidden="true"><app-skeleton variant="card" /></div>
+        } @loading {
+          <div class="chart-placeholder" role="status">Loading severity chart…</div>
+        } @error {
+          <div class="chart-placeholder chart-error">
+            Chart unavailable. Counts and percentages remain available below.
+          </div>
+        }
         <ul class="severity-list">
           @for (item of data.severities; track item.severity) {
             <li>
@@ -123,11 +143,21 @@
             <p>Most common entry points</p>
           </div>
         </div>
-        <app-dashboard-chart
-          kind="vectors"
-          [summary]="data"
-          description="Attack vectors ranked by detection count. Expand the data below for exact values."
-        />
+        @defer (on viewport) {
+          <app-dashboard-chart
+            kind="vectors"
+            [summary]="data"
+            description="Attack vectors ranked by detection count. Expand the data below for exact values."
+          />
+        } @placeholder {
+          <div class="chart-placeholder" aria-hidden="true"><app-skeleton variant="card" /></div>
+        } @loading {
+          <div class="chart-placeholder" role="status">Loading vector chart…</div>
+        } @error {
+          <div class="chart-placeholder chart-error">
+            Chart unavailable. Exact values remain available in the vector data below.
+          </div>
+        }
         <details>
           <summary>View vector data</summary>
           <div class="data-list">

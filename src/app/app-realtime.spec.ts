@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { FeedbackService } from './core/services/feedback.service';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
@@ -18,7 +18,7 @@ describe('Critical live notifications', () => {
       providers: [
         provideRouter([]),
         { provide: RealtimeService, useValue: { events$: events } },
-        { provide: MatSnackBar, useValue: { open } },
+        { provide: FeedbackService, useValue: { open } },
       ],
     });
     const fixture = TestBed.createComponent(App);

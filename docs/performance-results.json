@@ -1,0 +1,656 @@
+{
+  "measuredAt": "2026-10-03",
+  "units": "bytes; Lighthouse timing metrics in milliseconds, CLS unitless",
+  "method": "3 independent Chromium launches; production SPA preview with gzip and no-store; authenticated full navigation; median per metric",
+  "settings": {
+    "output": "json",
+    "maxWaitForFcp": 30000,
+    "maxWaitForLoad": 45000,
+    "pauseAfterFcpMs": 1000,
+    "pauseAfterLoadMs": 1000,
+    "networkQuietThresholdMs": 1000,
+    "cpuQuietThresholdMs": 1000,
+    "formFactor": "desktop",
+    "throttling": {
+      "rttMs": 40,
+      "throughputKbps": 10240,
+      "requestLatencyMs": 0,
+      "downloadThroughputKbps": 0,
+      "uploadThroughputKbps": 0,
+      "cpuSlowdownMultiplier": 1
+    },
+    "throttlingMethod": "simulate",
+    "screenEmulation": {
+      "mobile": false,
+      "width": 1440,
+      "height": 900,
+      "deviceScaleFactor": 1,
+      "disabled": false
+    },
+    "emulatedUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+    "auditMode": false,
+    "gatherMode": false,
+    "clearStorageTypes": ["file_systems", "shader_cache", "service_workers", "cache_storage"],
+    "disableStorageReset": true,
+    "debugNavigation": false,
+    "channel": "node",
+    "usePassiveGathering": true,
+    "disableFullPageScreenshot": false,
+    "skipAboutBlank": true,
+    "blankPage": "about:blank",
+    "ignoreStatusCode": false,
+    "locale": "en-US",
+    "blockedUrlPatterns": null,
+    "additionalTraceCategories": null,
+    "extraHeaders": null,
+    "precomputedLanternData": null,
+    "onlyAudits": null,
+    "onlyCategories": ["performance", "accessibility", "best-practices"],
+    "skipAudits": null
+  },
+  "before": {
+    "bundle": {
+      "initialRawBytes": 497630,
+      "angularEstimatedInitialTransferBytes": 128810,
+      "routes": {
+        "dashboard": 593308,
+        "threats": 20231,
+        "devices": 22043
+      }
+    },
+    "runs": [
+      {
+        "run": 1,
+        "route": "/login",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T15:29:53.947Z",
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 523.8499999999999,
+          "largest-contentful-paint": 686.025,
+          "cumulative-layout-shift": 0,
+          "total-blocking-time": 0
+        },
+        "warnings": []
+      },
+      {
+        "run": 1,
+        "route": "/dashboard",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T15:29:59.806Z",
+        "scores": {
+          "performance": 99,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 646.921025,
+          "largest-contentful-paint": 889.31575,
+          "cumulative-layout-shift": 0.0012594096451956876,
+          "total-blocking-time": 4
+        },
+        "warnings": []
+      },
+      {
+        "run": 2,
+        "route": "/login",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T15:30:07.931Z",
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 524.134,
+          "largest-contentful-paint": 684.951,
+          "cumulative-layout-shift": 0,
+          "total-blocking-time": 0
+        },
+        "warnings": []
+      },
+      {
+        "run": 2,
+        "route": "/dashboard",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T15:30:13.244Z",
+        "scores": {
+          "performance": 99,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 644.61955,
+          "largest-contentful-paint": 885.4565,
+          "cumulative-layout-shift": 0.0012594096451956876,
+          "total-blocking-time": 6.5
+        },
+        "warnings": []
+      },
+      {
+        "run": 3,
+        "route": "/login",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T15:30:21.268Z",
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 525.6312,
+          "largest-contentful-paint": 687.9467999999999,
+          "cumulative-layout-shift": 0,
+          "total-blocking-time": 0
+        },
+        "warnings": []
+      },
+      {
+        "run": 3,
+        "route": "/dashboard",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T15:30:26.844Z",
+        "scores": {
+          "performance": 99,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 650.0631,
+          "largest-contentful-paint": 895.233,
+          "cumulative-layout-shift": 0.0012594096451956876,
+          "total-blocking-time": 0
+        },
+        "warnings": []
+      }
+    ]
+  },
+  "after": {
+    "bundle": {
+      "initialRawBytes": 355706,
+      "initialGzipBytes": 113264,
+      "limits": {
+        "src/app/features/auth/login/login.ts": 16000,
+        "src/app/layout/shell/shell.ts": 100000,
+        "src/app/features/dashboard/dashboard.ts": 30000,
+        "src/app/features/threats/threats.ts": 25000,
+        "src/app/features/devices/devices.ts": 27000,
+        "src/app/features/settings/settings.ts": 40000,
+        "src/app/features/audit/audit.ts": 5000,
+        "src/app/features/dashboard/ui/dashboard-chart.ts": 600000
+      },
+      "chunks": [
+        {
+          "file": "main-AAYHDHPC.js",
+          "entryPoint": "src/main.ts",
+          "initial": true,
+          "rawBytes": 21873,
+          "gzipBytes": 7504
+        },
+        {
+          "file": "chunk-4Sltf4Me.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 1915,
+          "gzipBytes": 1127
+        },
+        {
+          "file": "chunk-8P0k-hZ3.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 6017,
+          "gzipBytes": 2178
+        },
+        {
+          "file": "chunk-B13hzHy5.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 2395,
+          "gzipBytes": 1051
+        },
+        {
+          "file": "chunk-B7qRX10o.js",
+          "entryPoint": "src/app/features/audit/audit.ts",
+          "initial": false,
+          "rawBytes": 1655,
+          "gzipBytes": 803
+        },
+        {
+          "file": "chunk-BEOoX5Pz.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 47484,
+          "gzipBytes": 11246
+        },
+        {
+          "file": "chunk-BFfJCMjU.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 30202,
+          "gzipBytes": 7886
+        },
+        {
+          "file": "chunk-BGUpCRVu.js",
+          "entryPoint": "src/app/features/settings/settings.ts",
+          "initial": false,
+          "rawBytes": 33243,
+          "gzipBytes": 6894
+        },
+        {
+          "file": "chunk-BHQaAVCK.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 97,
+          "gzipBytes": 109
+        },
+        {
+          "file": "chunk-BRrtUu61.js",
+          "entryPoint": "src/app/features/dashboard/dashboard.routes.ts",
+          "initial": false,
+          "rawBytes": 364,
+          "gzipBytes": 266
+        },
+        {
+          "file": "chunk-BSpoezuz.js",
+          "entryPoint": "src/app/features/auth/login/login.ts",
+          "initial": false,
+          "rawBytes": 12797,
+          "gzipBytes": 3963
+        },
+        {
+          "file": "chunk-BSxdetrl.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 8546,
+          "gzipBytes": 3734
+        },
+        {
+          "file": "chunk-BSzU892U.js",
+          "entryPoint": "src/app/layout/shell/shell.ts",
+          "initial": false,
+          "rawBytes": 85594,
+          "gzipBytes": 19913
+        },
+        {
+          "file": "chunk-BUAKLmAc.js",
+          "entryPoint": "src/app/features/devices/pages/device-detail.ts",
+          "initial": false,
+          "rawBytes": 18453,
+          "gzipBytes": 6004
+        },
+        {
+          "file": "chunk-BWXKQioi.js",
+          "entryPoint": "src/app/features/dashboard/ui/dashboard-chart.ts",
+          "initial": false,
+          "rawBytes": 573375,
+          "gzipBytes": 197499
+        },
+        {
+          "file": "chunk-Bc2w6bic.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 5838,
+          "gzipBytes": 2505
+        },
+        {
+          "file": "chunk-BjkHPX3x.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 45199,
+          "gzipBytes": 13583
+        },
+        {
+          "file": "chunk-C7ED9ZZ0.js",
+          "entryPoint": "src/app/features/threats/threats.ts",
+          "initial": false,
+          "rawBytes": 20275,
+          "gzipBytes": 6355
+        },
+        {
+          "file": "chunk-CLA9XHQz.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 5562,
+          "gzipBytes": 2507
+        },
+        {
+          "file": "chunk-CMaZ4Pbi.js",
+          "entryPoint": "src/app/shared/ui/forbidden/forbidden.ts",
+          "initial": false,
+          "rawBytes": 1941,
+          "gzipBytes": 905
+        },
+        {
+          "file": "chunk-CP1yum3S.js",
+          "entryPoint": null,
+          "initial": true,
+          "rawBytes": 33216,
+          "gzipBytes": 10741
+        },
+        {
+          "file": "chunk-C_omzqNQ.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 15537,
+          "gzipBytes": 4747
+        },
+        {
+          "file": "chunk-CcQt8Wr4.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 3968,
+          "gzipBytes": 1213
+        },
+        {
+          "file": "chunk-CsO0PRec.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 2089,
+          "gzipBytes": 895
+        },
+        {
+          "file": "chunk-CtPnMIiR.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 1901,
+          "gzipBytes": 841
+        },
+        {
+          "file": "chunk-D3kGAowm.js",
+          "entryPoint": "node_modules/@angular/material/fesm2022/dialog.mjs",
+          "initial": false,
+          "rawBytes": 306,
+          "gzipBytes": 189
+        },
+        {
+          "file": "chunk-D465y-PF.js",
+          "entryPoint": "src/app/features/threats/threats.routes.ts",
+          "initial": false,
+          "rawBytes": 541,
+          "gzipBytes": 317
+        },
+        {
+          "file": "chunk-DBlKmIb0.js",
+          "entryPoint": null,
+          "initial": true,
+          "rawBytes": 78098,
+          "gzipBytes": 21636
+        },
+        {
+          "file": "chunk-DBz49DvG.js",
+          "entryPoint": "src/app/features/threats/data-access/threat.repository.ts",
+          "initial": false,
+          "rawBytes": 274,
+          "gzipBytes": 188
+        },
+        {
+          "file": "chunk-DDksQASf.js",
+          "entryPoint": "src/app/features/devices/data-access/device.repository.ts",
+          "initial": false,
+          "rawBytes": 276,
+          "gzipBytes": 190
+        },
+        {
+          "file": "chunk-DJuqkXHp.js",
+          "entryPoint": "src/app/features/dashboard/data-access/dashboard.repository.ts",
+          "initial": false,
+          "rawBytes": 283,
+          "gzipBytes": 193
+        },
+        {
+          "file": "chunk-DNwl_A8t.js",
+          "entryPoint": "src/app/features/dashboard/dashboard.ts",
+          "initial": false,
+          "rawBytes": 21125,
+          "gzipBytes": 6943
+        },
+        {
+          "file": "chunk-DkVVtNGH.js",
+          "entryPoint": null,
+          "initial": true,
+          "rawBytes": 27235,
+          "gzipBytes": 10089
+        },
+        {
+          "file": "chunk-DlIRwxI9.js",
+          "entryPoint": "node_modules/@angular/material/fesm2022/snack-bar.mjs",
+          "initial": false,
+          "rawBytes": 305,
+          "gzipBytes": 185
+        },
+        {
+          "file": "chunk-Dr7bb7O0.js",
+          "entryPoint": "src/app/shared/ui/command-palette/command-palette.ts",
+          "initial": false,
+          "rawBytes": 6013,
+          "gzipBytes": 2348
+        },
+        {
+          "file": "chunk-DrbZq3y5.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 42117,
+          "gzipBytes": 6439
+        },
+        {
+          "file": "chunk-DvN-Rzaf.js",
+          "entryPoint": "src/app/features/devices/devices.routes.ts",
+          "initial": false,
+          "rawBytes": 542,
+          "gzipBytes": 316
+        },
+        {
+          "file": "chunk-Dx75Hhp7.js",
+          "entryPoint": "src/app/features/threats/pages/threat-detail.ts",
+          "initial": false,
+          "rawBytes": 13815,
+          "gzipBytes": 4855
+        },
+        {
+          "file": "chunk-Dxiyz5lH.js",
+          "entryPoint": null,
+          "initial": true,
+          "rawBytes": 174318,
+          "gzipBytes": 58869
+        },
+        {
+          "file": "chunk-DzK8XHBZ.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 47966,
+          "gzipBytes": 12533
+        },
+        {
+          "file": "chunk-FCYrdwKZ.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 1409,
+          "gzipBytes": 786
+        },
+        {
+          "file": "chunk-G8OTn5Qt.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 18014,
+          "gzipBytes": 5454
+        },
+        {
+          "file": "chunk-SyJnoW48.js",
+          "entryPoint": "src/app/shared/ui/notification-center/notification-center.ts",
+          "initial": false,
+          "rawBytes": 6281,
+          "gzipBytes": 2398
+        },
+        {
+          "file": "chunk-e72Y6MB5.js",
+          "entryPoint": "src/app/shared/ui/shortcut-help/shortcut-help.ts",
+          "initial": false,
+          "rawBytes": 2007,
+          "gzipBytes": 993
+        },
+        {
+          "file": "chunk-mnwB6KsC.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 795,
+          "gzipBytes": 453
+        },
+        {
+          "file": "chunk-nBYfsSdA.js",
+          "entryPoint": "src/app/features/devices/devices.ts",
+          "initial": false,
+          "rawBytes": 22079,
+          "gzipBytes": 6754
+        },
+        {
+          "file": "chunk-rnZNRncD.js",
+          "entryPoint": null,
+          "initial": false,
+          "rawBytes": 2433,
+          "gzipBytes": 1139
+        },
+        {
+          "file": "chunk-xAxxT4Vx.js",
+          "entryPoint": "src/app/shared/ui/not-found/not-found.ts",
+          "initial": false,
+          "rawBytes": 1951,
+          "gzipBytes": 911
+        },
+        {
+          "file": "styles-UXNMBKLH.css",
+          "entryPoint": "angular:styles/global:styles",
+          "initial": true,
+          "rawBytes": 20966,
+          "gzipBytes": 4425
+        }
+      ],
+      "angularEstimatedInitialTransferBytes": 99710
+    },
+    "runs": [
+      {
+        "run": 1,
+        "route": "/login",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T20:31:03.296Z",
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 521.5899999999999,
+          "largest-contentful-paint": 635.1399999999999,
+          "cumulative-layout-shift": 0,
+          "total-blocking-time": 0
+        },
+        "warnings": []
+      },
+      {
+        "run": 1,
+        "route": "/dashboard",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T20:31:08.886Z",
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 544.7860000000001,
+          "largest-contentful-paint": 685.6790000000001,
+          "cumulative-layout-shift": 0.0012594096451956876,
+          "total-blocking-time": 0
+        },
+        "warnings": []
+      },
+      {
+        "run": 2,
+        "route": "/login",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T20:31:17.249Z",
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 523.8525999999999,
+          "largest-contentful-paint": 644.6596,
+          "cumulative-layout-shift": 0,
+          "total-blocking-time": 0
+        },
+        "warnings": []
+      },
+      {
+        "run": 2,
+        "route": "/dashboard",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T20:31:22.739Z",
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 501.8776,
+          "largest-contentful-paint": 680.5663999999999,
+          "cumulative-layout-shift": 0.0012594096451956876,
+          "total-blocking-time": 0
+        },
+        "warnings": []
+      },
+      {
+        "run": 3,
+        "route": "/login",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T20:31:30.506Z",
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 524.3500250000001,
+          "largest-contentful-paint": 640.2111500000001,
+          "cumulative-layout-shift": 0,
+          "total-blocking-time": 0
+        },
+        "warnings": []
+      },
+      {
+        "run": 3,
+        "route": "/dashboard",
+        "browser": "Chrome/153.0.8010.12",
+        "lighthouseVersion": "13.5.0",
+        "fetchTime": "2026-10-03T20:31:35.871Z",
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100
+        },
+        "metrics": {
+          "first-contentful-paint": 542.1334,
+          "largest-contentful-paint": 681.2001,
+          "cumulative-layout-shift": 0.0012594096451956876,
+          "total-blocking-time": 0
+        },
+        "warnings": []
+      }
+    ]
+  }
+}

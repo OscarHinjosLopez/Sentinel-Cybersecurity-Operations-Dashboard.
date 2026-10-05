@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
   selector: 'app-shortcut-help',
   imports: [MatDialogModule, MatButtonModule],
   template: `<h2 mat-dialog-title>Keyboard shortcuts</h2>
-    <mat-dialog-content
+    <mat-dialog-content tabindex="0" role="region" aria-label="Shortcut reference"
       ><dl>
         <div>
           <dt>Command Palette</dt>

@@ -15,7 +15,7 @@ import { EmptyState } from '../empty-state/empty-state';
         <app-icon name="close" />
       </button>
     </div>
-    <mat-dialog-content
+    <mat-dialog-content tabindex="0" role="region" aria-label="Recent notifications"
       ><div class="toolbar">
         <span>{{ store.unreadCount() }} unread</span
         ><button mat-button [disabled]="!store.hasUnread()" (click)="store.markAllAsRead()">

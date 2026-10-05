@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { FeedbackService } from '../services/feedback.service';
 import { vi } from 'vitest';
 import { GlobalErrorHandler, RecoverableUiError } from './global-error-handler';
 import { Logger } from './logger';
@@ -15,7 +15,7 @@ describe('Global error handling', () => {
       providers: [
         GlobalErrorHandler,
         { provide: Logger, useValue: { report } },
-        { provide: MatSnackBar, useValue: { open } },
+        { provide: FeedbackService, useValue: { open } },
       ],
     });
     handler = TestBed.inject(GlobalErrorHandler);

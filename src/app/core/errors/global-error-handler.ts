@@ -1,5 +1,5 @@
 import { ErrorHandler, Injectable, inject } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { FeedbackService } from '../services/feedback.service';
 import { Logger } from './logger';
 
 // Only explicitly classified recoverable errors request user feedback.
@@ -10,7 +10,7 @@ export class RecoverableUiError extends Error {
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
   private readonly logger = inject(Logger);
-  private readonly snackbar = inject(MatSnackBar);
+  private readonly snackbar = inject(FeedbackService);
   private lastFeedback = -Infinity;
   handleError(error: unknown): void {
     const recoverable = error instanceof RecoverableUiError;
@@ -34,7 +34,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     if (!recoverable || Date.now() - this.lastFeedback < 10000) return;
     this.lastFeedback = Date.now();
     try {
-      this.snackbar.open('Something went wrong. Please try again.', 'Dismiss', {
+      void this.snackbar.open('Something went wrong. Please try again.', 'Dismiss', {
         duration: 5000,
         politeness: 'polite',
       });

@@ -25,6 +25,8 @@ import { RealtimeService } from '../../../core/realtime/realtime.service';
       align-items: center;
       gap: 0.4rem;
       padding: 0.35rem 0.4rem;
+      min-width: 1.5rem;
+      min-height: 1.5rem;
       color: var(--sentinel-text-secondary);
       font-size: var(--sentinel-font-caption);
       border-radius: var(--sentinel-radius-sm);

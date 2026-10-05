@@ -34,11 +34,12 @@
           },
           "configurations": {
             "production": {
+              "sourceMap": false,
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "400kB",
+                  "maximumError": "450kB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -77,7 +78,10 @@
               "buildTarget": "sentinel:build:development"
             },
             "e2e": {
-              "buildTarget": "sentinel:build:e2e"
+              "buildTarget": "sentinel:build:e2e",
+              "prebundle": false,
+              "liveReload": false,
+              "hmr": false
             }
           },
           "defaultConfiguration": "development"
